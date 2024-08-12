@@ -1,5 +1,5 @@
-#ifndef QUASI_CONTROLLER_H
-#define QUASI_CONTROLLER_H
+#ifndef DOUBLE_SLS_CONTROLLER_H
+#define DOUBLE_SLS_CONTROLLER_H
 
 #include <ros/ros.h>
 
@@ -28,8 +28,8 @@
 #include <double_sls_controller/PTStates.h>
 #include <double_sls_controller/AttOut.h>
 
-#define QUASI_SITL_ENABLED true
-#if QUASI_SITL_ENABLED
+#define SITL_ENABLED true
+#if SITL_ENABLED
     #include <gazebo_msgs/LinkStates.h>
 #endif
 
@@ -86,10 +86,10 @@ bool offb_ground_debug_enabled = false;
 bool gain_mismatched = false;
 bool rate_target_enabled = true;
 
-#if QUASI_SITL_ENABLED
-    bool quasi_sitl_enabled = true;
+#if SITL_ENABLED
+    bool sitl_enabled = true;
 #else
-    bool quasi_sitl_enabled = false;
+    bool sitl_enabled = false;
 #endif
 
 bool quad_only_enabled = true;
@@ -151,7 +151,7 @@ double setpoint[6] = {0, 0, -1.25, 0, 0, 0};
 
 /*============================== SLS Physics ==============================*/
 
-#if QUASI_SITL_ENABLED
+#if SITL_ENABLED
     double M_QUAD = 1.55; // Mass of UAV
     double M_LOAD = 0.25;  // Mass of Load
     double L_CABLE = 0.85;  // Length of Cable
@@ -187,29 +187,29 @@ double t0 = 0;
 /*============================== Helper Function Declarations ==============================*/
 
 PendulumAngles ToPenAngles(double Lx,double Ly,double Lz);
-void PT_state_pub(ros::Publisher &sls_state_pub);
+void pubPTState(ros::Publisher &sls_state_pub);
 void force_attitude_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude);
 void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude);
 void att_out_pub(ros::Publisher &att_con_pub, const double controller_output[3]);
-void quasi_update_params(const ros::NodeHandle &nh);
-void quasi_print_params(void);
+void updateParams(const ros::NodeHandle &nh);
+void printParams(void);
 void get_quad_states(void);
 void get_pend_states(void);
-void apply_outerloop_control(double Kv6[6], double setpoint[6]);
+void pubQuadControl(double Kv6[6], double setpoint[6]);
 
 
 /*============================== Callback Function Declarations ==============================*/
 
-void state_cb(const mavros_msgs::State::ConstPtr& msg);
-void pose_get_cb(const geometry_msgs::PoseStamped::ConstPtr& msg);
-void pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg);
-void vel_cb(const geometry_msgs::TwistStamped::ConstPtr& msg);
-void loadpose_cb(const geometry_msgs::TransformStamped::ConstPtr& msg);
+void stateCallback(const mavros_msgs::State::ConstPtr& msg);
+void posegetCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
+void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
+void velCallback(const geometry_msgs::TwistStamped::ConstPtr& msg);
+void loadposeCallback(const geometry_msgs::TransformStamped::ConstPtr& msg);
 void timerCallback(const ros::TimerEvent&);
-void attitude_target_cb(const mavros_msgs::AttitudeTarget::ConstPtr& msg);
-void sls_state_cb(const double_sls_controller::PTStates::ConstPtr& msg);
-#if QUASI_SITL_ENABLED
-    void gazebo_state_cb(const gazebo_msgs::LinkStates::ConstPtr& msg);
+void attitudetargetCallback(const mavros_msgs::AttitudeTarget::ConstPtr& msg);
+void slsstateCallback(const double_sls_controller::PTStates::ConstPtr& msg);
+#if SITL_ENABLED
+    void gazeboCallback(const gazebo_msgs::LinkStates::ConstPtr& msg);
 #endif
 
 

@@ -87,31 +87,30 @@ include_directories(
   ${Eigen_INCLUDE_DIRS}
 )
 
-add_library(${PROJECT_NAME}
-  src/quasi_controller.cpp
-)
 
+
+add_library(${PROJECT_NAME}
+  src/double_sls_controller.cpp
+)
 add_dependencies(double_sls_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
-
-
-
 add_executable(offb_control_node src/offb_node.cpp)
-add_executable(get_states_node src/getStates.cpp)
+add_executable(get_states_node src/get_states_node.cpp)
 
-add_dependencies(get_states_node double_sls_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(get_states_node double_sls_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(offb_control_node ${PROJECT_NAME} ${catkin_LIBRARIES})
 target_link_libraries(get_states_node ${PROJECT_NAME} ${catkin_LIBRARIES})
+target_link_libraries(offb_control_node ${PROJECT_NAME} ${catkin_LIBRARIES})
 
 add_subdirectory(src/StabController)
 add_subdirectory(src/TracController)
 
-target_link_libraries(offb_control_node StabController)
-target_link_libraries(offb_control_node TracController)
 target_link_libraries(get_states_node StabController)
 target_link_libraries(get_states_node TracController)
+target_link_libraries(offb_control_node StabController)
+target_link_libraries(offb_control_node TracController)
+
 
 
 #############

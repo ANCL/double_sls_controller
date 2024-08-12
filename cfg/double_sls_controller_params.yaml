@@ -11,8 +11,8 @@ k_acc_y : 18.7962
 k_jer_z : 0
 k_jer_x : 17.4399 
 k_jer_y : 17.4399 
-m_quad : 1.6    
+m_quad_a : 1.6    
 m_load : 0.25   
 l_cable : 0.85  
-gravity : 9.8  
+gravity : 9.81  
 att_ctrl_tau : 0.3

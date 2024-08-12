@@ -1,0 +1,37 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/zichen/catkin_ws/devel/lib/python3/dist-packages",
+        "/home/zichen/PX4_SITL_664/Tools/sitl_gazebo/ancl_sls/RosControl/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/zichen/catkin_ws/devel/lib/python3/dist-packages",
+        "/home/zichen/PX4_SITL_664/Tools/sitl_gazebo/ancl_sls/RosControl/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ],
+    "cSpell.words": [
+        "attctrl",
+        "attitudetarget",
+        "cosa",
+        "cosb",
+        "cosbeta",
+        "Eigen",
+        "loadpose",
+        "loadtwist",
+        "mavros",
+        "mavstate",
+        "offb",
+        "outerloop",
+        "penangle",
+        "pendpose",
+        "quadpose",
+        "Quadrotor",
+        "quadtwist",
+        "setpoint",
+        "sigmoidf",
+        "sina",
+        "sinbeta",
+        "SITL",
+        "slsstate"
+    ]
+}

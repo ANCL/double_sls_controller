@@ -1,4 +1,4 @@
-#include <quasi_controller/quasi_controller.h>
+#include <double_sls_controller/double_sls_controller.h>
 #include <double_sls_controller/PTStates.h>
 #include <rtwtypes.h>
 #include <StabController.h>
@@ -11,15 +11,15 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "offb_node");
     ros::NodeHandle nh;
-    ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>("/mavros/state", 10, state_cb);
-	ros::Subscriber local_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/mavros/local_position/pose",10,pose_get_cb);
-    ros::Subscriber local_vel_sub = nh.subscribe<geometry_msgs::TwistStamped>("/mavros/local_position/velocity_local",10,vel_cb);
-    ros::Subscriber attitude_target_sub = nh.subscribe<mavros_msgs::AttitudeTarget>("/double_sls_controller/target_attitude", 10, attitude_target_cb);
-    ros::Subscriber sls_state_sub = nh.subscribe<double_sls_controller::PTStates>("/double_sls_controller/sls_state", 10, sls_state_cb);
-    #if QUASI_SITL_ENABLED
-      ros::Subscriber gazebo_state_sub = nh.subscribe<gazebo_msgs::LinkStates>("/gazebo/link_states", 10, gazebo_state_cb);
+    ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>("/mavros/state", 10, stateCallback);
+	ros::Subscriber local_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("/mavros/local_position/pose",10,posegetCallback);
+    ros::Subscriber local_vel_sub = nh.subscribe<geometry_msgs::TwistStamped>("/mavros/local_position/velocity_local",10,velCallback);
+    ros::Subscriber attitudetarget_sub = nh.subscribe<mavros_msgs::AttitudeTarget>("/double_sls_controller/target_attitude", 10, attitudetargetCallback);
+    ros::Subscriber sls_state_sub = nh.subscribe<double_sls_controller::PTStates>("/double_sls_controller/sls_state", 10, slsstateCallback);
+    #if SITL_ENABLED
+      ros::Subscriber gazebo_state_sub = nh.subscribe<gazebo_msgs::LinkStates>("/gazebo/link_states", 10, gazeboCallback);
     #else
-      ros::Subscriber load_vicon_sub = nh.subscribe<geometry_msgs::TransformStamped>("/vicon/test_jul19/test_jul19",10, loadpose_cb);
+      ros::Subscriber load_vicon_sub = nh.subscribe<geometry_msgs::TransformStamped>("/vicon/test_jul19/test_jul19",10, loadposeCallback);
     #endif
     ros::Publisher attitude_setpoint_pub = nh.advertise<mavros_msgs::AttitudeTarget>("/mavros/setpoint_raw/attitude", 10);
     ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local", 10);
@@ -77,15 +77,15 @@ int main(int argc, char **argv)
     double temp;
 
     while(offb_ground_debug_enabled){
-        quasi_update_params(nh);
-        quasi_print_params();
+        updateParams(nh);
+        printParams();
     }
 
     while(ros::ok()){
 
         nh.getParam("bool", gotime);
         if(param_tuning_enabled){
-            quasi_update_params(nh);    
+            updateParams(nh);    
         }
 
         for (int i=0; i<10; i++){
@@ -134,7 +134,7 @@ int main(int argc, char **argv)
             temp = ros::Time::now().toSec();
             ros::Duration(0.001).sleep();
             if(quad_only_enabled){
-                apply_outerloop_control(Kv6, setpoint);    
+                pubQuadControl(Kv6, setpoint);    
                 attitude.header.stamp = ros::Time::now();
                 attitude_setpoint_pub.publish(attitude);    
                 printf("%f", ros::Time::now().toSec() -temp);               

@@ -1,0 +1,8 @@
+prefix=/home/zichen/catkin_ws/src/double_sls_controller/build/devel
+
+Name: double_sls_controller
+Description: Description of double_sls_controller
+Version: 0.0.0
+Cflags: -I/home/zichen/catkin_ws/src/double_sls_controller/build/devel/include -I/home/zichen/catkin_ws/src/double_sls_controller/include
+Libs: -L${prefix}/lib -ldouble_sls_controller
+Requires: roscpp rospy std_msgs mavros message_runtime

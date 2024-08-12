@@ -1,6 +1,6 @@
-#include <quasi_controller/quasi_controller.h>
-#include <quasi_controller/common.h>
-#include <quasi_controller/control.h>
+#include <double_sls_controller/double_sls_controller.h>
+#include <double_sls_controller/common.h>
+#include <double_sls_controller/control.h>
 
 
 /*============================== Helper Function Implementations ==============================*/
@@ -48,7 +48,7 @@ void att_out_pub(ros::Publisher &att_con_pub, const double controller_output[3])
 }
 
 
-void PT_state_pub(ros::Publisher &sls_state_pub){
+void pubPTState(ros::Publisher &sls_state_pub){
     PTState.header.stamp = ros::Time::now();
     PTState.PT_states[0] = current_local_pos.pose.position.x;
     PTState.PT_states[1] = -current_local_pos.pose.position.y;
@@ -72,12 +72,12 @@ void force_attitude_convert(double controller_output[3], mavros_msgs::AttitudeTa
     roll = std::asin(controller_output[1]/thrust);
     pitch = std::atan2(controller_output[0], -controller_output[2]);
 
-    tf2::Quaternion attitude_target_q;
-    attitude_target_q.setRPY(roll, pitch, yaw);
-    attitude.orientation.x = attitude_target_q.getX();
-    attitude.orientation.y = attitude_target_q.getY();
-    attitude.orientation.z = attitude_target_q.getZ();
-    attitude.orientation.w = attitude_target_q.getW();
+    tf2::Quaternion attitudetarget_q;
+    attitudetarget_q.setRPY(roll, pitch, yaw);
+    attitude.orientation.x = attitudetarget_q.getX();
+    attitude.orientation.y = attitudetarget_q.getY();
+    attitude.orientation.z = attitudetarget_q.getZ();
+    attitude.orientation.w = attitudetarget_q.getW();
 
     attitude.thrust = std::max(0.0, std::min(1.0, (thrust - thrust_0) / thrust_coeff + thrust_norm_hover));
     attitude.type_mask = 1|2|4;
@@ -91,12 +91,12 @@ void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget
     yaw = 0;
     roll = std::asin(controller_output[1]/thrust);
     pitch = std::atan2(controller_output[0], -controller_output[2]);
-    tf2::Quaternion attitude_target_q;
-    attitude_target_q.setRPY(roll, pitch, yaw);
-    attitude.orientation.x = attitude_target_q.getX();
-    attitude.orientation.y = attitude_target_q.getY();
-    attitude.orientation.z = attitude_target_q.getZ();
-    attitude.orientation.w = attitude_target_q.getW();
+    tf2::Quaternion attitudetarget_q;
+    attitudetarget_q.setRPY(roll, pitch, yaw);
+    attitude.orientation.x = attitudetarget_q.getX();
+    attitude.orientation.y = attitudetarget_q.getY();
+    attitude.orientation.z = attitudetarget_q.getZ();
+    attitude.orientation.w = attitudetarget_q.getW();
 
     Eigen::Vector4d curr_att;
     Eigen::Vector4d ref_att;
@@ -105,10 +105,10 @@ void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget
     curr_att(1) = quadpose.orientation.x; //ROS_INFO_STREAM("quadpose.ori.x:" << quadpose.orientation.x);
     curr_att(2) = quadpose.orientation.y; //ROS_INFO_STREAM("quadpose.ori.y:" << quadpose.orientation.y);
     curr_att(3) = quadpose.orientation.z; //ROS_INFO_STREAM("quadpose.ori.z:" << quadpose.orientation.z);
-    ref_att(0) = attitude_target_q.getW();
-    ref_att(1) = attitude_target_q.getX();
-    ref_att(2) = attitude_target_q.getY();
-    ref_att(3) = attitude_target_q.getZ();
+    ref_att(0) = attitudetarget_q.getW();
+    ref_att(1) = attitudetarget_q.getX();
+    ref_att(2) = attitudetarget_q.getY();
+    ref_att(3) = attitudetarget_q.getZ();
 
     const Eigen::Vector4d inverse(1.0, -1.0, -1.0, -1.0);
     const Eigen::Vector4d q_inv = inverse.asDiagonal() * curr_att;
@@ -135,7 +135,7 @@ void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget
 
 
 #if GAIN_MISMATCHED
-void quasi_update_params(const ros::NodeHandle &nh){
+void updateParams(const ros::NodeHandle &nh){
     nh.getParam("k_pos_z", K_POS_Z); Kv12[0] = K_VEL_Z;
     nh.getParam("k_pos_x", K_POS_X); Kv12[1] = K_JER_X;
     nh.getParam("k_pos_y", K_POS_Y); Kv12[2] = K_JER_Y; 
@@ -155,7 +155,7 @@ void quasi_update_params(const ros::NodeHandle &nh){
     nh.getParam("att_ctrl_tau", attctrl_tau_); 
 }
 #else
-void quasi_update_params(const ros::NodeHandle &nh){
+void updateParams(const ros::NodeHandle &nh){
     nh.getParam("k_pos_z", K_POS_Z); Kv12[0] = K_POS_Z;
     nh.getParam("k_pos_x", K_POS_X); Kv12[1] = K_POS_X;
     nh.getParam("k_pos_y", K_POS_Y); Kv12[2] = K_POS_Y; 
@@ -176,7 +176,7 @@ void quasi_update_params(const ros::NodeHandle &nh){
 }
 #endif
 
-void quasi_print_params(void){
+void printParams(void){
     ROS_INFO_STREAM("K_POS_Z: " << K_POS_Z);
     ROS_INFO_STREAM("K_POS_X: " << K_POS_X);   
     ROS_INFO_STREAM("K_POS_Y: " << K_POS_Y);
@@ -229,7 +229,7 @@ void get_pend_states(void){
 }
 
 
-void apply_outerloop_control(double Kv6[6], double setpoint[6]){
+void pubQuadControl(double Kv6[6], double setpoint[6]){
     // double controller_output[3];
     controller_output[0] = (-Kv6[0] * (sls_state1.x - setpoint[0]) - Kv6[3] * (sls_state1.vx - setpoint[3]))*M_QUAD;
     controller_output[1] = (-Kv6[1] * (sls_state1.y - setpoint[1]) - Kv6[4] * (sls_state1.vy - setpoint[4]))*M_QUAD;
@@ -242,16 +242,16 @@ void apply_outerloop_control(double Kv6[6], double setpoint[6]){
 /*============================== Callback Function Implementations ==============================*/
 
 
-void state_cb(const mavros_msgs::State::ConstPtr& msg){
+void stateCallback(const mavros_msgs::State::ConstPtr& msg){
     current_state = *msg;
 }
 
 
-void pose_get_cb(const geometry_msgs::PoseStamped::ConstPtr& msg)
+void posegetCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
 	current_local_pos = *msg;
 
-    #if !QUASI_SITL_ENABLED
+    #if !SITL_ENABLED
     
     quadpose.position.x = current_local_pos.pose.position.x;
     quadpose.position.y = current_local_pos.pose.position.y;
@@ -282,17 +282,17 @@ void pose_get_cb(const geometry_msgs::PoseStamped::ConstPtr& msg)
 }
 
 
-void pose_cb(const geometry_msgs::PoseStamped::ConstPtr& msg){
+void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg){
 	current_local_pos = *msg;
 }
 
 
-void vel_cb(const geometry_msgs::TwistStamped::ConstPtr& msg){
+void velCallback(const geometry_msgs::TwistStamped::ConstPtr& msg){
     current_local_vel = *msg;
 }
 
 
-void loadpose_cb(const geometry_msgs::TransformStamped::ConstPtr& msg){
+void loadposeCallback(const geometry_msgs::TransformStamped::ConstPtr& msg){
     load_pose.header.frame_id = "map";
     
     load_pose.header.stamp = ros::Time::now();
@@ -304,7 +304,7 @@ void loadpose_cb(const geometry_msgs::TransformStamped::ConstPtr& msg){
     
 }
 
-void quadpose_cb(const geometry_msgs::TransformStamped::ConstPtr& msg){
+void quadposeCallback(const geometry_msgs::TransformStamped::ConstPtr& msg){
     load_pose.header.frame_id = "map";
     
     load_pose.header.stamp = ros::Time::now();
@@ -317,12 +317,12 @@ void quadpose_cb(const geometry_msgs::TransformStamped::ConstPtr& msg){
 }
 
 
-void attitude_target_cb(const mavros_msgs::AttitudeTarget::ConstPtr& msg){
+void attitudetargetCallback(const mavros_msgs::AttitudeTarget::ConstPtr& msg){
     attitude = *msg;
 }
 
 
-void sls_state_cb(const double_sls_controller::PTStates::ConstPtr& msg){
+void slsstateCallback(const double_sls_controller::PTStates::ConstPtr& msg){
     PTState = *msg;
 }
 
@@ -339,8 +339,8 @@ void timerCallback(const ros::TimerEvent&){
     load_pose0.pose.position.z = load_pose.pose.position.z;
 }
 
-#if QUASI_SITL_ENABLED
-void gazebo_state_cb(const gazebo_msgs::LinkStates::ConstPtr& msg){
+#if SITL_ENABLED
+void gazeboCallback(const gazebo_msgs::LinkStates::ConstPtr& msg){
 
     quadpose = msg->pose[2];
     pendpose = msg->pose[9];
