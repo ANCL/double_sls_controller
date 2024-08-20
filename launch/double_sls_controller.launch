@@ -1,0 +1,9 @@
+<launch>
+    <group ns="uav0">
+        <node pkg="double_sls_controller" name="double_sls_uav0" type="double_sls_uav0_node"/>
+    </group>
+     
+    <group ns="uav1">
+        <node pkg="double_sls_controller" name="double_sls_uav1" type="double_sls_uav1_node"/>
+    </group>
+</launch>

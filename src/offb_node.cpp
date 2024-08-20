@@ -1,4 +1,4 @@
-#include <double_sls_controller/double_sls_controller.h>
+#include <double_sls_controller/single_sls_controller.h>
 #include <double_sls_controller/PTStates.h>
 #include <rtwtypes.h>
 #include <StabController.h>
@@ -149,14 +149,13 @@ int main(int argc, char **argv)
                 }
                 attitude.header.stamp = ros::Time::now();
                 attitude_setpoint_pub.publish(attitude);
-                printf("%f", ros::Time::now().toSec() -temp); 
+                // Get calculation time
+                // printf("%f", ros::Time::now().toSec() -temp); 
             }
 
-
-
             err_pend_pose = std::pow((current_local_pos.pose.position.x - Setpoint[0]),2) 
-            + std::pow((current_local_pos.pose.position.y - (-Setpoint[1])),2)
-            + std::pow((current_local_pos.pose.position.z - (-Setpoint[2]+0.95)),2);
+                + std::pow((current_local_pos.pose.position.y - (-Setpoint[1])),2)
+                + std::pow((current_local_pos.pose.position.z - (-Setpoint[2]+0.95)),2);
             if(ros::Time::now() - last_request > ros::Duration(15.0) && err_pend_pose < 0.2){
                 //stage += 1;
                 ROS_INFO("Achieve position setpoint and switch to Setpoint 1");

@@ -1,7 +1,7 @@
 #include <rtwtypes.h>
 #include <StabController.h>
 #include <TracController.h>
-#include <double_sls_controller/double_sls_controller.h>
+#include <double_sls_controller/single_sls_controller.h>
 #include <double_sls_controller/PTStates.h>
 #include <double_sls_controller/AttOut.h>
 

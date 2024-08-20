@@ -133,6 +133,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
     "/home/zichen/catkin_ws/src/double_sls_controller/msg/PTStates.msg"
     "/home/zichen/catkin_ws/src/double_sls_controller/msg/ActuatorControl0.msg"
     "/home/zichen/catkin_ws/src/double_sls_controller/msg/AttOut.msg"
+    "/home/zichen/catkin_ws/src/double_sls_controller/msg/PendAngle.msg"
     )
 endif()
 
@@ -188,6 +189,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/zichen/catkin_ws/src/double_sls_controller/build/gtest/cmake_install.cmake")
   include("/home/zichen/catkin_ws/src/double_sls_controller/build/src/StabController/cmake_install.cmake")
   include("/home/zichen/catkin_ws/src/double_sls_controller/build/src/TracController/cmake_install.cmake")
+  include("/home/zichen/catkin_ws/src/double_sls_controller/build/src/QuadSLS_PT_Controller_QSF/cmake_install.cmake")
 
 endif()
 

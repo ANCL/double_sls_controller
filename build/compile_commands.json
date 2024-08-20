@@ -1,20 +1,44 @@
 [
 {
   "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
-  "command": "/usr/bin/g++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I../src/StabController -I../src/TracController  -g   -std=c++11 -o CMakeFiles/get_states_node.dir/src/get_states_node.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/get_states_node.cpp",
+  "command": "/usr/bin/g++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I../src/StabController -I../src/TracController -I../src/QuadSLS_PT_Controller_QSF  -g   -std=c++11 -o CMakeFiles/get_states_node.dir/src/get_states_node.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/get_states_node.cpp",
   "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/get_states_node.cpp"
 },
 
 {
   "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
-  "command": "/usr/bin/g++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I../src/StabController -I../src/TracController  -g   -std=c++11 -o CMakeFiles/offb_control_node.dir/src/offb_node.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/offb_node.cpp",
+  "command": "/usr/bin/g++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I../src/StabController -I../src/TracController -I../src/QuadSLS_PT_Controller_QSF  -g   -std=c++11 -o CMakeFiles/offb_control_node.dir/src/offb_node.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/offb_node.cpp",
   "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/offb_node.cpp"
+},
+
+{
+  "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
+  "command": "/usr/bin/g++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Ddouble_sls_controller_EXPORTS -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp  -g -fPIC   -std=c++11 -o CMakeFiles/double_sls_controller.dir/src/single_sls_controller.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/single_sls_controller.cpp",
+  "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/single_sls_controller.cpp"
 },
 
 {
   "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
   "command": "/usr/bin/g++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Ddouble_sls_controller_EXPORTS -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp  -g -fPIC   -std=c++11 -o CMakeFiles/double_sls_controller.dir/src/double_sls_controller.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/double_sls_controller.cpp",
   "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/double_sls_controller.cpp"
+},
+
+{
+  "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
+  "command": "/usr/bin/g++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp  -g   -std=c++11 -o CMakeFiles/double_sls_uav1_node.dir/src/double_sls_uav1_node.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/double_sls_uav1_node.cpp",
+  "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/double_sls_uav1_node.cpp"
+},
+
+{
+  "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
+  "command": "/usr/bin/g++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp  -g   -std=c++11 -o CMakeFiles/double_sls_uav0_node.dir/src/double_sls_uav0_node.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/double_sls_uav0_node.cpp",
+  "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/double_sls_uav0_node.cpp"
+},
+
+{
+  "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
+  "command": "/usr/bin/g++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I../src/QuadSLS_PT_Controller_QSF  -g   -std=c++11 -o CMakeFiles/single_sls_controller_node.dir/src/single_sls_controller_node.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/single_sls_controller_node.cpp",
+  "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/single_sls_controller_node.cpp"
 },
 
 {
@@ -111,5 +135,47 @@
   "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
   "command": "/usr/bin/g++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -DTracController_EXPORTS -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I../src/TracController  -g -fPIC   -std=c++11 -o src/TracController/CMakeFiles/TracController.dir/rt_nonfinite.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/TracController/rt_nonfinite.cpp",
   "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/TracController/rt_nonfinite.cpp"
+},
+
+{
+  "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
+  "command": "/usr/bin/g++  -DQuadSLS_PT_Controller_QSF_EXPORTS -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I../src/QuadSLS_PT_Controller_QSF  -g -fPIC   -std=c++11 -o src/QuadSLS_PT_Controller_QSF/CMakeFiles/QuadSLS_PT_Controller_QSF.dir/QuadSLS_PT_Controller_QSF.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/QuadSLS_PT_Controller_QSF/QuadSLS_PT_Controller_QSF.cpp",
+  "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/QuadSLS_PT_Controller_QSF/QuadSLS_PT_Controller_QSF.cpp"
+},
+
+{
+  "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
+  "command": "/usr/bin/g++  -DQuadSLS_PT_Controller_QSF_EXPORTS -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I../src/QuadSLS_PT_Controller_QSF  -g -fPIC   -std=c++11 -o src/QuadSLS_PT_Controller_QSF/CMakeFiles/QuadSLS_PT_Controller_QSF.dir/QuadSLS_PT_Controller_QSF_data.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/QuadSLS_PT_Controller_QSF/QuadSLS_PT_Controller_QSF_data.cpp",
+  "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/QuadSLS_PT_Controller_QSF/QuadSLS_PT_Controller_QSF_data.cpp"
+},
+
+{
+  "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
+  "command": "/usr/bin/g++  -DQuadSLS_PT_Controller_QSF_EXPORTS -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I../src/QuadSLS_PT_Controller_QSF  -g -fPIC   -std=c++11 -o src/QuadSLS_PT_Controller_QSF/CMakeFiles/QuadSLS_PT_Controller_QSF.dir/QuadSLS_PT_Controller_QSF_initialize.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/QuadSLS_PT_Controller_QSF/QuadSLS_PT_Controller_QSF_initialize.cpp",
+  "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/QuadSLS_PT_Controller_QSF/QuadSLS_PT_Controller_QSF_initialize.cpp"
+},
+
+{
+  "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
+  "command": "/usr/bin/g++  -DQuadSLS_PT_Controller_QSF_EXPORTS -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I../src/QuadSLS_PT_Controller_QSF  -g -fPIC   -std=c++11 -o src/QuadSLS_PT_Controller_QSF/CMakeFiles/QuadSLS_PT_Controller_QSF.dir/QuadSLS_PT_Controller_QSF_terminate.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/QuadSLS_PT_Controller_QSF/QuadSLS_PT_Controller_QSF_terminate.cpp",
+  "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/QuadSLS_PT_Controller_QSF/QuadSLS_PT_Controller_QSF_terminate.cpp"
+},
+
+{
+  "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
+  "command": "/usr/bin/g++  -DQuadSLS_PT_Controller_QSF_EXPORTS -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I../src/QuadSLS_PT_Controller_QSF  -g -fPIC   -std=c++11 -o src/QuadSLS_PT_Controller_QSF/CMakeFiles/QuadSLS_PT_Controller_QSF.dir/rtGetInf.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/QuadSLS_PT_Controller_QSF/rtGetInf.cpp",
+  "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/QuadSLS_PT_Controller_QSF/rtGetInf.cpp"
+},
+
+{
+  "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
+  "command": "/usr/bin/g++  -DQuadSLS_PT_Controller_QSF_EXPORTS -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I../src/QuadSLS_PT_Controller_QSF  -g -fPIC   -std=c++11 -o src/QuadSLS_PT_Controller_QSF/CMakeFiles/QuadSLS_PT_Controller_QSF.dir/rtGetNaN.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/QuadSLS_PT_Controller_QSF/rtGetNaN.cpp",
+  "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/QuadSLS_PT_Controller_QSF/rtGetNaN.cpp"
+},
+
+{
+  "directory": "/home/zichen/catkin_ws/src/double_sls_controller/build",
+  "command": "/usr/bin/g++  -DQuadSLS_PT_Controller_QSF_EXPORTS -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"double_sls_controller\\\" -Idevel/include -I/usr/include/eigen3 -I../include -I/home/zichen/catkin_ws/devel/include -I/home/zichen/catkin_ws/src/mavros/libmavconn/include -I/home/zichen/catkin_ws/src/mavros/mavros_msgs/include -I/home/zichen/catkin_ws/src/mavros/mavros/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I../src/QuadSLS_PT_Controller_QSF  -g -fPIC   -std=c++11 -o src/QuadSLS_PT_Controller_QSF/CMakeFiles/QuadSLS_PT_Controller_QSF.dir/rt_nonfinite.cpp.o -c /home/zichen/catkin_ws/src/double_sls_controller/src/QuadSLS_PT_Controller_QSF/rt_nonfinite.cpp",
+  "file": "/home/zichen/catkin_ws/src/double_sls_controller/src/QuadSLS_PT_Controller_QSF/rt_nonfinite.cpp"
 }
 ]
