@@ -5,7 +5,7 @@
     <!-- vehicle model and world -->
     <arg name="est" default="ekf2"/>
     <arg name="vehicle" default="px4vision"/>
-    <arg name="world" default="$(find offboard)/worlds/empty_attacher.world"/>
+    <arg name="world" default="$(find double_sls_controller)/worlds/empty_attacher.world"/>
     <!-- gazebo configs -->
     <arg name="gui" default="true"/>
     <arg name="debug" default="false"/>
