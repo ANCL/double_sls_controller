@@ -34,18 +34,18 @@
     #include <gazebo_msgs/LinkStates.h>
 #endif
 
-/* SLS0 */
-geometry_msgs::PoseStamped uav0_pose, uav0_pose_last;
-geometry_msgs::TwistStamped uav0_twist;
-geometry_msgs::PoseStamped pend0_pose;
-geometry_msgs::TwistStamped pend0_twist;
-double_sls_controller::PendAngle pend0_angle;
+// /* SLS0 */
+// geometry_msgs::PoseStamped uav0_pose, uav0_pose_last;
+// geometry_msgs::TwistStamped uav0_twist;
+// geometry_msgs::PoseStamped pend0_pose;
+// geometry_msgs::TwistStamped pend0_twist;
+// double_sls_controller::PendAngle pend0_angle;
 
-/* SLS1 */
-geometry_msgs::PoseStamped uav1_pose;
-geometry_msgs::TwistStamped uav1_twist;
-geometry_msgs::PoseStamped pend1_pose;
-geometry_msgs::TwistStamped pend1_twist;
+// /* SLS1 */
+// geometry_msgs::PoseStamped uav1_pose;
+// geometry_msgs::TwistStamped uav1_twist;
+// geometry_msgs::PoseStamped pend1_pose;
+// geometry_msgs::TwistStamped pend1_twist;
 
 /* Payload */
 // geometry_msgs::PoseStamped load_pose, load_pose_last;

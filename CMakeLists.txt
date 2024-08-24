@@ -30,6 +30,7 @@ add_message_files(
   ActuatorControl0.msg
   AttOut.msg
   PendAngle.msg
+  DSlsState.msg
 )
 
 generate_messages(

@@ -21,6 +21,40 @@ void gazeboCallback(const gazebo_msgs::LinkStates::ConstPtr& msg);
 void apply_outerloop_control(double Kv6[6], double setpoint[6]);
 void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude);
 
+bool gazebo_link_name_matched = false;
+
+
+int link_index[5];
+int uav0_link_index;
+int uav1_link_index;
+int pend0_link_index;
+int pend1_link_index;
+int load_link_index;
+const char* link_name[5] = {
+    "px4vision_0::base_link", 
+    "px4vision_1::base_link",
+    "slung_load::pendulum_0::base_link",
+    "slung_load::pendulum_1::base_link",
+    "slung_load::load::base_link"
+    };
+
+
+/* [System States] uav0 & pend0 */
+geometry_msgs::PoseStamped uav0_pose, uav0_pose_last;
+geometry_msgs::TwistStamped uav0_twist, uav0_twist_last;
+geometry_msgs::PoseStamped pend0_pose;
+geometry_msgs::TwistStamped pend0_twist;
+double_sls_controller::PendAngle pend0_angle;
+geometry_msgs::Vector3 pend0_q;
+/* [System States] uav1 & pend1 */
+geometry_msgs::PoseStamped uav1_pose, uav1_pose_last;
+geometry_msgs::TwistStamped uav1_twist, uav1_twist_last;
+geometry_msgs::PoseStamped pend1_pose;
+geometry_msgs::TwistStamped pend1_twist;
+geometry_msgs::Vector3 pend1_q;
+/* [System States] load */
+geometry_msgs::PoseStamped load_pose, load_pose_last;
+geometry_msgs::TwistStamped load_vel;
 
 int main(int argc, char **argv)
 {
@@ -110,18 +144,30 @@ void state_cb(const mavros_msgs::State::ConstPtr& msg){
 }
 
 void gazeboCallback(const gazebo_msgs::LinkStates::ConstPtr& msg){
+    if(!gazebo_link_name_matched){
+        int temp_index[5];
+        ROS_INFO("[gazebo_cb] Matching Gazebo Links");
+        for(int i=0; i<23; i++){
+            for(int j=0; j<5; j++){
+                if(msg->name[i] == link_name[j]){
+                    temp_index[j] = i;
+                    //ROS_INFO("%s index = %d", link_name[j], temp_index[j]);
+                };
+            }
+        }
+        uav0_link_index = temp_index[0];    ROS_INFO_STREAM("[gazebo_cb] uav0_link_index=" << uav0_link_index);
+        uav1_link_index = temp_index[1];    ROS_INFO_STREAM("[gazebo_cb] uav1_link_index=" << uav1_link_index);
+        pend0_link_index = temp_index[2];   ROS_INFO_STREAM("[gazebo_cb] pend0_link_index=" << pend0_link_index);
+        pend1_link_index = temp_index[3];   ROS_INFO_STREAM("[gazebo_cb] pend0_link_index=" << pend1_link_index);
+        load_link_index = temp_index[4];    ROS_INFO_STREAM("[gazebo_cb] load_link_index=" << load_link_index);
+        gazebo_link_name_matched = true;
+        ROS_INFO("[gazebo_cb] Matching Complete");
+    }
 
-    uav1_pose.pose = msg->pose[15];
-    // uav1_pose.pose.position.x = msg->pose[7].position.x;
-    // uav1_pose.pose.position.y = msg->pose[7].position.y;
-    // uav1_pose.pose.position.z = msg->pose[7].position.z;
-
-    uav1_twist.twist = msg->twist[15];
-    // uav1_twist.twist.linear.x = msg->twist{7}.linear.x;
-    // uav1_twist.twist.linear.y = msg->twist{7}.linear.y;
-    // uav1_twist.twist.linear.z = msg->twist{7}.linear.z;
-
-    ROS_INFO_STREAM(uav1_pose);
+    uav0_pose.pose = msg->pose[uav0_link_index];
+    uav0_twist.twist = msg->twist[uav0_link_index];
+    uav1_pose.pose = msg->pose[uav1_link_index];
+    uav1_twist.twist = msg->twist[uav1_link_index];
 }
 
 void apply_outerloop_control(double Kv6[6], double setpoint[6]){
