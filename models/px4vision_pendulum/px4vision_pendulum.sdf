@@ -1,0 +1,175 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+  <enable_lockstep>false</enable_lockstep>
+  <model name='px4vision_pendulum'>
+  <static>false</static>
+  <include>
+    <uri>model://px4vision_ancl</uri>
+  </include>
+
+  <!-- <link name='battery'>
+    <pose>0 0 0.071</pose>
+    <inertial>
+      <mass>0.6</mass>
+      <inertia>
+        <ixx>0.00021816</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>0.0011</iyy>
+        <iyz>0</iyz>
+        <izz>0.0010</izz>
+      </inertia>
+    </inertial>
+    <collision name='battery_collision'>
+      <geometry>
+        <box>
+          <size>0.138 0.046 0.048</size>
+        </box>
+      </geometry>      
+    </collision>
+    <visual name='battery_visual'>
+      <geometry>
+        <box>
+          <size>0.138 0.046 0.048</size>
+        </box>
+      </geometry>
+      <material>
+        <script>
+          <name>Gazebo/DarkGrey</name>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+        </script>
+      </material>
+    </visual>
+  </link> -->
+
+  <link name='pendulum'>
+    <pose>-0.425 0 0 0 1.57 0</pose>
+    <inertial>
+      <mass>0.01</mass>
+      <inertia>
+        <ixx>0.00060208</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>0.00060208</iyy>
+        <iyz>0</iyz>
+        <izz>0.000000005</izz>
+      </inertia>
+    </inertial>
+    <collision name='pendulun_collision'>
+      <geometry>
+        <cylinder>
+          <radius>0.01</radius>
+          <length>0.85</length>
+        </cylinder>
+      </geometry>
+      <surface>
+        <contact>
+          <ode/>
+        </contact>
+        <friction>
+          <ode/>
+        </friction>
+      </surface>
+    </collision>
+    <visual name='pendulum_visual'>
+      <geometry>
+        <cylinder>
+          <radius>0.001</radius>
+          <length>0.85</length>
+        </cylinder>
+      </geometry>
+      <material>
+        <script>
+          <name>Gazebo/White</name>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+        </script>
+      </material>
+    </visual>
+    <gravity>1</gravity>
+
+  </link>
+
+  <link name='load'>
+    <pose>-0.85 0 0 0 1.57 0</pose>
+    <inertial>
+      <mass>0.25</mass>
+      <inertia>
+        <ixx>0.00025</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>0.00025</iyy>
+        <iyz>0</iyz>
+        <izz>0.00025</izz>
+      </inertia>
+    </inertial>
+    <collision name='load_collision'>
+      <geometry>
+        <sphere>
+          <radius>0.05 0.05 0.05</radius>
+        </sphere>
+      </geometry>
+      <surface>
+        <contact>
+          <ode/>
+        </contact>
+        <friction>
+          <ode/>
+        </friction>
+      </surface>
+    </collision>
+    <visual name='load_visual'>
+      <geometry>
+        <sphere>
+          <radius>0.05 0.05 0.05</radius>
+        </sphere>
+      </geometry>
+      <material>
+        <script>
+          <name>Gazebo/Red</name>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+        </script>
+      </material>
+    </visual>
+    <gravity>1</gravity>
+  </link>
+
+  <joint name='load_joint' type='universal'>
+    <pose>0 0 0.0 0 0 0</pose>
+    <child>load</child>
+    <parent>pendulum</parent>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <dynamics>
+        <friction>10</friction>
+      </dynamics>
+    </axis>
+
+    <axis2>
+      <xyz>1 1 0</xyz>
+      <dynamics>
+        <friction>100</friction>
+      </dynamics>
+    </axis2>
+  </joint>
+
+  <joint name='pendulum_joint' type='universal'>
+    <pose>0 0 0.425 0 0 0</pose>
+    <!-- <axis>
+      <xyz>1 0 0</xyz>
+    </axis>
+    <axis2>
+      <xyz>0 1 0</xyz>
+    </axis2> -->
+    <child>pendulum</child>
+    <parent>px4vision_ancl::base_link</parent>
+  </joint>
+
+  <!-- <joint name='battery_joint' type='fixed'>
+    <pose>0 0 0.0 0 0 0</pose>
+    <child>battery</child>
+    <parent>px4vision_ancl::base_link</parent>
+  </joint>   -->
+
+
+  </model>
+</sdf>

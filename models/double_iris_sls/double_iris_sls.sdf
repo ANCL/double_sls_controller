@@ -1,0 +1,190 @@
+<?xml version="1.0"?>
+<sdf version='1.6'>
+    <model name='double_quad_sls'>
+      <static>false</static>
+      <include>
+          <uri>model://iris</uri>
+          <name>iris_1</name>
+          <pose>0.85 0 0 0 0 0</pose>
+      </include>
+
+      <include>
+          <uri>model://iris</uri>
+          <name>iris_2</name>
+          <pose>-0.85 0 0 0 0 0</pose>
+      </include>
+
+      <link name='load_link'>
+          <pose>0 0 0 0 0 0</pose>
+          <inertial>
+            <mass>0.25</mass>
+            <inertia>
+              <ixx>0.00025</ixx>
+              <ixy>0</ixy>
+              <ixz>0</ixz>
+              <iyy>0.00025</iyy>
+              <iyz>0</iyz>
+              <izz>0.00025</izz>
+            </inertia>
+          </inertial>
+          <collision name='load_collision'>
+            <geometry>
+              <sphere>
+                <radius>0.05 0.05 0.05</radius>
+              </sphere>
+            </geometry>
+            <surface>
+              <contact>
+                <ode/>
+              </contact>
+              <friction>
+                <ode/>
+              </friction>
+            </surface>
+          </collision>
+          <visual name='load_visual'>
+            <geometry>
+              <sphere>
+                <radius>0.05 0.05 0.05</radius>
+              </sphere>
+            </geometry>
+            <material>
+              <script>
+                <name>Gazebo/Red</name>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+              </script>
+            </material>
+          </visual>
+          <gravity>1</gravity>
+      </link>
+
+      <link name='pend_1_link'>
+          <pose>0.425 0 0 0 1.57 0</pose>
+          <inertial>
+            <mass>0.01</mass>
+            <inertia>
+              <ixx>0.00060208</ixx>
+              <ixy>0</ixy>
+              <ixz>0</ixz>
+              <iyy>0.00060208</iyy>
+              <iyz>0</iyz>
+              <izz>0.000000005</izz>
+            </inertia>
+          </inertial>
+          <collision name='pendulun_collision'>
+            <geometry>
+              <cylinder>
+                <radius>0.01</radius>
+                <length>0.85</length>
+              </cylinder>
+            </geometry>
+            <surface>
+              <contact>
+                <ode/>
+              </contact>
+              <friction>
+                <ode/>
+              </friction>
+            </surface>
+          </collision>
+          <visual name='pendulum_visual'>
+            <geometry>
+              <cylinder>
+                <radius>0.001</radius>
+                <length>0.85</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <name>Gazebo/White</name>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+              </script>
+            </material>
+          </visual>
+          <gravity>1</gravity>
+      </link>
+
+      <link name='pend_2_link'>
+          <pose>-0.425 0 0 0 -1.57 0</pose>
+          <inertial>
+            <mass>0.01</mass>
+            <inertia>
+              <ixx>0.00060208</ixx>
+              <ixy>0</ixy>
+              <ixz>0</ixz>
+              <iyy>0.00060208</iyy>
+              <iyz>0</iyz>
+              <izz>0.000000005</izz>
+            </inertia>
+          </inertial>
+          <collision name='pendulun_collision'>
+            <geometry>
+              <cylinder>
+                <radius>0.01</radius>
+                <length>0.85</length>
+              </cylinder>
+            </geometry>
+            <surface>
+              <contact>
+                <ode/>
+              </contact>
+              <friction>
+                <ode/>
+              </friction>
+            </surface>
+          </collision>
+          <visual name='pendulum_visual'>
+            <geometry>
+              <cylinder>
+                <radius>0.001</radius>
+                <length>0.85</length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <name>Gazebo/White</name>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+              </script>
+            </material>
+          </visual>
+          <gravity>1</gravity>
+      </link>
+
+      <joint name="pend_1_joint" type="universal">
+        <pose>0 0 0.425 0 0 0</pose>
+        <child>pend_1_link</child>
+        <parent>iris_1::base_link</parent>
+      </joint>
+
+      <joint name="pend_2_joint" type="universal">
+        <pose>0 0 0.425 0 0 0</pose>
+        <child>pend_2_link</child>
+        <parent>iris_2::base_link</parent>
+      </joint>
+
+
+      <joint name="load_1_joint" type="universal">
+        <pose>0 0 0 0 0 0</pose>
+        <child>load_link</child>
+        <parent>pend_1_link</parent>
+        <axis>
+          <xyz>1 1 1</xyz>
+          <dynamics>
+            <friction>10</friction>
+          </dynamics>
+        </axis>
+      </joint>
+
+      <joint name="load_2_joint" type="universal">
+          <child>load_link</child>
+          <parent>pend_2_link</parent>
+          <axis>
+            <xyz>1 1 1</xyz>
+            <dynamics>
+              <friction>10</friction>
+            </dynamics>
+          </axis>
+      </joint>
+
+    </model>
+</sdf>
