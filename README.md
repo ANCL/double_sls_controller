@@ -21,7 +21,7 @@ catkin build
 ### 4. Install Double SLS Controller
 ```
 cd ~/catkin_ws/src
-git clone https://github.com/zichen1105/double_sls_controller.git --recursive
+git clone https://github.com/ANCL/double_sls_controller.git --recursive
 cd ..
 catkin build
 ```
