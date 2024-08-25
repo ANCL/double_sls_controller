@@ -8,6 +8,8 @@ cd ~/PX4-Autopilot
 git submodule update
 cd ~
 bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
+cd ~/PX4-Autopilot
+make px4_sitl gazebo
 ```
 ### 2. Install ROS Noetic & MAVROS  
 Follow the guide at https://docs.px4.io/v1.13/en/ros/mavros_installation.html  
