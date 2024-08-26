@@ -60,10 +60,10 @@ rosrun gazebo_ros_link_attacher attach_sls.py
 ```
 # in a new terminal
 cd
-./QroundControl.AppImage
+./QGroundControl.AppImage
 ```
 ### 4. Launch Double SLS Contoller
 ```
 # in a new terminal
-roslaunch double_sls_controller double_sls_controller.launch`
+roslaunch double_sls_controller double_sls_controller.launch
 ```

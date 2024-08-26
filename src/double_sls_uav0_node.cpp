@@ -14,6 +14,9 @@
 #include <double_sls_controller/control.h>
 #include <double_sls_controller/DSlsState.h>
 
+#define MIN_DELTA_TIME 0.0001
+#define L 0.85
+
 mavros_msgs::State current_state;
 mavros_msgs::AttitudeTarget attitude;
 double_sls_controller::DSlsState state18;
@@ -168,36 +171,66 @@ void gazeboCallback(const gazebo_msgs::LinkStates::ConstPtr& msg){
         ROS_INFO("[gazebo_cb] Matching Complete");
     }
 
+    double diff_time; // = 0.5;
+    diff_time = (ros::Time::now().toSec() - gazebo_last_called); // gives nan or inf sometimes
+    ROS_INFO_STREAM("diff_time:" << diff_time);
+    gazebo_last_called = ros::Time::now().toSec();
+
+    
     uav0_pose.pose = msg -> pose[uav0_link_index];
     uav0_twist.twist = msg -> twist[uav0_link_index];
     uav1_pose.pose = msg -> pose[uav1_link_index];
     uav1_twist.twist = msg -> twist[uav1_link_index];
-    // x__p
     load_pose.pose = msg -> pose[load_link_index];
-    // q1
-    pend0_q.x = load_pose.pose.position.x - uav0_pose.pose.position.x;
-    pend0_q.y = load_pose.pose.position.y - uav0_pose.pose.position.y;
-    pend0_q.z = load_pose.pose.position.z - uav0_pose.pose.position.z;
-    // q2
-    pend1_q.x = load_pose.pose.position.x - uav1_pose.pose.position.x;
-    pend1_q.y = load_pose.pose.position.y - uav1_pose.pose.position.y;
-    pend1_q.z = load_pose.pose.position.z - uav1_pose.pose.position.z;
-    // v__p
     load_twist.twist = msg -> twist[load_link_index];
-    // omega
-    double diff_time; // = 0.5;
-    diff_time = (ros::Time::now().toSec() - gazebo_last_called); // gives nan or inf sometimes
-    gazebo_last_called = ros::Time::now().toSec();
-    pend0_q_dot.x = (pend0_q.x - pend0_q_last.x) / diff_time;
-    pend0_q_dot.y = (pend0_q.y - pend0_q_last.y) / diff_time;
-    pend0_q_dot.z = (pend0_q.z - pend0_q_last.z) / diff_time;
-    pend1_q_dot.x = (pend1_q.x - pend1_q_last.x) / diff_time;
-    pend1_q_dot.y = (pend1_q.y - pend1_q_last.y) / diff_time;
-    pend1_q_dot.z = (pend1_q.z - pend1_q_last.z) / diff_time;
-    pend0_omega = crossProduct(pend0_q, pend0_q_dot);
-    pend1_omega = crossProduct(pend1_q, pend1_q_dot);
+
+    // coordinate transform
+    uav0_pose.pose.position.y = -uav0_pose.pose.position.y; 
+    uav0_pose.pose.position.z = -uav0_pose.pose.position.z; 
+
+    uav1_pose.pose.position.y = -uav1_pose.pose.position.y; 
+    uav1_pose.pose.position.z = -uav1_pose.pose.position.z; 
+
+    uav0_twist.twist.linear.y = -uav0_twist.twist.linear.y;
+    uav0_twist.twist.linear.z = -uav0_twist.twist.linear.z;
+
+    uav1_twist.twist.linear.y = -uav1_twist.twist.linear.y;
+    uav1_twist.twist.linear.z = -uav1_twist.twist.linear.z;
+
+    load_pose.pose.position.y = -load_pose.pose.position.y; 
+    load_pose.pose.position.z = -load_pose.pose.position.z;    
+
+    load_twist.twist.linear.y = -load_twist.twist.linear.y;
+    load_twist.twist.linear.z = -load_twist.twist.linear.z;
+
     
-    // system states
+    // q1
+    pend0_q.x = (load_pose.pose.position.x - uav0_pose.pose.position.x) / L;
+    pend0_q.y = (load_pose.pose.position.y - uav0_pose.pose.position.y) / L;
+    pend0_q.z = (load_pose.pose.position.z - uav0_pose.pose.position.z) / L;
+    // q2
+    pend1_q.x = (load_pose.pose.position.x - uav1_pose.pose.position.x) / L;
+    pend1_q.y = (load_pose.pose.position.y - uav1_pose.pose.position.y) / L;
+    pend1_q.z = (load_pose.pose.position.z - uav1_pose.pose.position.z) / L;
+
+    
+
+    if(diff_time > MIN_DELTA_TIME){    
+        // omega
+        pend0_q_dot.x = (pend0_q.x - pend0_q_last.x) / diff_time;
+        pend0_q_dot.y = (pend0_q.y - pend0_q_last.y) / diff_time;
+        pend0_q_dot.z = (pend0_q.z - pend0_q_last.z) / diff_time;
+        pend1_q_dot.x = (pend1_q.x - pend1_q_last.x) / diff_time;
+        pend1_q_dot.y = (pend1_q.y - pend1_q_last.y) / diff_time;
+        pend1_q_dot.z = (pend1_q.z - pend1_q_last.z) / diff_time;
+        pend0_omega = crossProduct(pend0_q, pend0_q_dot);
+        pend1_omega = crossProduct(pend1_q, pend1_q_dot);
+        // next step
+        pend0_q_last = pend0_q;
+        pend1_q_last = pend1_q;
+    }
+
+    // system state msg
     state18.dsls_state[0] = load_pose.pose.position.x;
     state18.dsls_state[1] = load_pose.pose.position.y;
     state18.dsls_state[2] = load_pose.pose.position.z;
@@ -218,17 +251,15 @@ void gazeboCallback(const gazebo_msgs::LinkStates::ConstPtr& msg){
     state18.dsls_state[17] = pend1_omega.z;   
     state18.header.stamp = ros::Time::now();
 
-    // next step
-    pend0_q_last = pend0_q;
-    pend1_q_last = pend1_q;
+    //else ROS_INFO_STREAM('Time step too small, skipping...');
 }
 
 void apply_outerloop_control(double Kv6[6], double setpoint[6]){
     double M_QUAD = 1.55;
     double controller_output[3];
     controller_output[0] = (-Kv6[0] * (uav0_pose.pose.position.x - setpoint[0]) - Kv6[3] * (uav0_twist.twist.linear.x - setpoint[3]))*M_QUAD;
-    controller_output[1] = (-Kv6[1] * (-uav0_pose.pose.position.y - setpoint[1]) - Kv6[4] * (-uav0_twist.twist.linear.y - setpoint[4]))*M_QUAD;
-    controller_output[2] = (-Kv6[2] * (-uav0_pose.pose.position.z - setpoint[2]) - Kv6[5] * (-uav0_twist.twist.linear.z - setpoint[5]) - 9.81)*M_QUAD;
+    controller_output[1] = (-Kv6[1] * (uav0_pose.pose.position.y - setpoint[1]) - Kv6[4] * (uav0_twist.twist.linear.y - setpoint[4]))*M_QUAD;
+    controller_output[2] = (-Kv6[2] * (uav0_pose.pose.position.z - setpoint[2]) - Kv6[5] * (uav0_twist.twist.linear.z - setpoint[5]) - 9.81)*M_QUAD;
     force_rate_convert(controller_output, attitude);
 }
 
@@ -287,4 +318,8 @@ geometry_msgs::Vector3 crossProduct(const geometry_msgs::Vector3 v1, geometry_ms
     result.y = v1.z * v2.x - v1.x * v2.z; 
     result.z = v1.x * v2.y - v1.y * v2.x; 
     return result; 
+}
+
+void applyDEAController(double_sls_controller::DSlsState state18){
+    DEAController(state18, )
 }
