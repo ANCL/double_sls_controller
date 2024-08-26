@@ -8,6 +8,8 @@ cd ~/PX4-Autopilot
 git submodule update
 cd ~
 bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
+cd ~/PX4-Autopilot
+make px4_sitl gazebo
 ```
 ### 2. Install ROS Noetic & MAVROS  
 Follow the guide at https://docs.px4.io/v1.13/en/ros/mavros_installation.html  
@@ -21,7 +23,7 @@ catkin build
 ### 4. Install Double SLS Controller
 ```
 cd ~/catkin_ws/src
-git clone https://github.com/zichen1105/double_sls_controller.git --recursive
+git clone https://github.com/ANCL/double_sls_controller.git --recursive
 cd ..
 catkin build
 ```
@@ -45,7 +47,7 @@ export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/PX4-Autopilot/Tools/sitl_gazebo
 export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins
 export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:~/catkin_ws/src/double_sls_controller/models
 ```
-## Usage
+## Run DSLS SITL
 ### 1. Launch PX4 SITL
 ```
 # in a new terminal
