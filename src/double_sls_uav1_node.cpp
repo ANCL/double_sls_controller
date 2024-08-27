@@ -6,6 +6,7 @@
 
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Vector3Stamped.h>
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
@@ -13,26 +14,31 @@
 #include <double_sls_controller/common.h>
 #include <double_sls_controller/control.h>
 #include <double_sls_controller/DSlsState.h>
+#include <double_sls_controller/DEAState.h>
+#include <DEAController.h>
 
 #define MIN_DELTA_TIME 0.0001
 #define L 0.85
 
+
 mavros_msgs::State current_state;
 mavros_msgs::AttitudeTarget attitude;
+mavros_msgs::AttitudeTarget attitude_dea;
 double_sls_controller::DSlsState state18;
+double_sls_controller::DEAState dea_xi4;
 double gazebo_last_called;
+double controller_last_called;
 
-void state_cb(const mavros_msgs::State::ConstPtr& msg);
-void gazeboCallback(const gazebo_msgs::LinkStates::ConstPtr& msg);
-void apply_outerloop_control(double Kv6[6], double setpoint[6]);
+void stateCb(const mavros_msgs::State::ConstPtr& msg);
+void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg);
 void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude);
+void applyQuadController(double Kv6[6], double setpoint[6]);
+void applyDEAController(double_sls_controller::DSlsState state18, double_sls_controller::DEAState dea_xi4, const double dea_k[24], const double dea_param[4], const double ref[13]);
 geometry_msgs::Vector3 crossProduct(const geometry_msgs::Vector3 v1, geometry_msgs::Vector3 v2);
 
 /* Gazebo Index Matching */
 bool gazebo_link_name_matched = false;
-
-
-int link_index[5];
+bool dea_enabled;
 int uav0_link_index;
 int uav1_link_index;
 int pend0_link_index;
@@ -46,7 +52,6 @@ const char* link_name[5] = {
     "slung_load::load::base_link"
     };
 
-
 /* uav0 */
 geometry_msgs::PoseStamped uav0_pose, uav0_pose_last;
 geometry_msgs::TwistStamped uav0_twist, uav0_twist_last;
@@ -54,42 +59,80 @@ geometry_msgs::TwistStamped uav0_twist, uav0_twist_last;
 geometry_msgs::PoseStamped uav1_pose, uav1_pose_last;
 geometry_msgs::TwistStamped uav1_twist, uav1_twist_last;
 /* pend0 */
-geometry_msgs::PoseStamped pend0_pose;
-geometry_msgs::TwistStamped pend0_twist;
 geometry_msgs::Vector3 pend0_q, pend0_q_last, pend0_q_dot;
 geometry_msgs::Vector3 pend0_omega;
 /* pend1 */
-geometry_msgs::PoseStamped pend1_pose;
-geometry_msgs::TwistStamped pend1_twist;
 geometry_msgs::Vector3 pend1_q, pend1_q_last, pend1_q_dot;
 geometry_msgs::Vector3 pend1_omega;
 /* load */
 geometry_msgs::PoseStamped load_pose, load_pose_last;
 geometry_msgs::TwistStamped load_twist;
+/* DEA Controller Output Force */
+geometry_msgs::Vector3Stamped dea_force;
+
+void pubDebugData(
+    ros::Publisher &test_setpoint_pub, mavros_msgs::AttitudeTarget &attitude_dea,
+    ros::Publisher &dsls_state_pub, double_sls_controller::DSlsState &state18,
+    ros::Publisher &dea_state_pub, double_sls_controller::DEAState &dea_xi4,
+    ros::Publisher &dea_force_pub,  geometry_msgs::Vector3Stamped &dea_force
+){
+    test_setpoint_pub.publish(attitude_dea);
+    dsls_state_pub.publish(state18);
+    dea_state_pub.publish(dea_xi4);
+    dea_force_pub.publish(dea_force);
+}
 
 int main(int argc, char **argv){
+
+    /* ROS Node Utilities */
     ros::init(argc, argv, "double_sls_uav1_node");
     ros::NodeHandle nh;
-    ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
-            ("/uav1/mavros/state", 10, state_cb);    
-    ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
-            ("/uav1/mavros/setpoint_position/local", 10);
-    ros::Publisher attitude_setpoint_pub = nh.advertise<mavros_msgs::AttitudeTarget>
-            ("/uav1/mavros/setpoint_raw/attitude", 10);
-    ros::Publisher dsls_state_pub = nh.advertise<double_sls_controller::DSlsState>
-            ("/uav1/double_sls_controller/dsls_state", 10);
-    ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool>
-            ("/uav1/mavros/cmd/arming");
-    ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode>
-            ("/uav1/mavros/set_mode");
+    ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State> ("/uav1/mavros/state", 10, stateCb);    
+    ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped> ("/uav1/mavros/setpoint_position/local", 10);
+    ros::Publisher attitude_setpoint_pub = nh.advertise<mavros_msgs::AttitudeTarget> ("/uav1/mavros/setpoint_raw/attitude", 10);
+    ros::Publisher test_setpoint_pub = nh.advertise<mavros_msgs::AttitudeTarget> ("/uav1/double_sls_controller/setpoint_raw/attitude", 10);
+    ros::Publisher dsls_state_pub = nh.advertise<double_sls_controller::DSlsState> ("/uav1/double_sls_controller/dsls_state", 10);
+    ros::Publisher dea_state_pub = nh.advertise<double_sls_controller::DEAState> ("/uav1/double_sls_controller/dea_state", 10);
+    ros::Publisher dea_force_pub = nh.advertise<geometry_msgs::Vector3Stamped> ("/uav1/double_sls_controller/dea_force", 10);
+    ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool> ("/uav1/mavros/cmd/arming");
+    ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode> ("/uav1/mavros/set_mode");
     // #if SITL_ENABLED
-        ros::Subscriber gazebo_state_sub = nh.subscribe<gazebo_msgs::LinkStates>("/gazebo/link_states", 10, gazeboCallback);
+        ros::Subscriber gazebo_state_sub = nh.subscribe<gazebo_msgs::LinkStates>("/gazebo/link_states", 10, gazeboCb);
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(50.0);
 
-    double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
-    double setpoint[6] = {0, 1.0, -2.5, 0, 0, 0};
 
+
+    double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
+    double setpoint[6] = {0, 1.0, -1.0, 0, 0, 0};
+    double dea_xi[4] = {0, 0, 0, 0}; //DEA controller state
+    const double dea_k1[4] = {0.4025,    2.1325,    4.0800,   3.3500};
+    const double dea_k2[4] = {0.4025,    2.1325,    4.0800,   3.3500};
+    const double dea_k3[4] = {24.0000,   50.0000,   35.0000,   10.0000};
+    const double dea_k4[4] = {2.0000,    3.0000,         0,         0};
+    const double dea_k5[4] = {2.0000,    3.0000,         0,         0};
+    const double dea_k6[4] = {2.0000,    3.0000,         0,         0};
+    double dea_k[24] = {};
+    const double dea_param[4] = {1.55, 0.25, 0.85, 9.81};
+    const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.85, 0, 90};
+    
+    for(int i = 0; i < 4; i++){
+        dea_k[0 + i*6] = dea_k1[i];
+        dea_k[1 + i*6] = dea_k2[i];
+        dea_k[2 + i*6] = dea_k3[i];
+        dea_k[3 + i*6] = dea_k4[i];
+        dea_k[4 + i*6] = dea_k5[i];
+        dea_k[5 + i*6] = dea_k6[i];
+    }
+
+    for(int j = 0; j < 24; j++){
+        ROS_INFO_STREAM(dea_k[j]);
+    }
+
+    dea_xi4.dea_xi4[0] = -9.81;
+    dea_xi4.dea_xi4[1] = -9.81/2;
+    dea_xi4.dea_xi4[2] = 0;
+    dea_xi4.dea_xi4[3] = 0;
 
     // wait for FCU connection
     while(ros::ok() && !current_state.connected){
@@ -118,6 +161,9 @@ int main(int argc, char **argv){
     ros::Time last_request = ros::Time::now();
 
     while(ros::ok()){
+
+        nh.getParam("/double_sls_controller/dea_enabled", dea_enabled);
+
         if( current_state.mode != "OFFBOARD" &&
             (ros::Time::now() - last_request > ros::Duration(5.0))){
             if( set_mode_client.call(offb_set_mode) &&
@@ -136,11 +182,30 @@ int main(int argc, char **argv){
             }
         }
 
-        // local_pos_pub.publish(pose);
-        apply_outerloop_control(Kv6, setpoint);  
-        attitude.header.stamp = ros::Time::now();
-        attitude_setpoint_pub.publish(attitude); 
-        dsls_state_pub.publish(state18);
+        if(dea_enabled){
+            ROS_INFO_STREAM("Running DEA...");
+            applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
+            attitude.header.stamp = ros::Time::now();
+            attitude_setpoint_pub.publish(attitude_dea); 
+        }
+        else{
+            ROS_INFO_STREAM("Running Quad...");
+            applyQuadController(Kv6, setpoint); 
+            attitude.header.stamp = ros::Time::now();
+            attitude_setpoint_pub.publish(attitude); 
+            applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
+        }
+        
+        
+        
+
+        /* Publish System Data for Debugging */
+        pubDebugData(
+            test_setpoint_pub, attitude_dea, 
+            dsls_state_pub, state18, 
+            dea_state_pub, dea_xi4,
+            dea_force_pub, dea_force
+            );
 
         ros::spinOnce();
         rate.sleep();
@@ -150,14 +215,14 @@ int main(int argc, char **argv){
 }
 
 
-void state_cb(const mavros_msgs::State::ConstPtr& msg){
+void stateCb(const mavros_msgs::State::ConstPtr& msg){
     current_state = *msg;
 }
 
-void gazeboCallback(const gazebo_msgs::LinkStates::ConstPtr& msg){
+void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg){
     /* Match links on the first call*/
     if(!gazebo_link_name_matched){
-        ROS_INFO("[gazebo_cb] Matching Gazebo Links");
+        ROS_INFO("[gazeboCb] Matching Gazebo Links");
         int temp_index[5];
         for(int i=0; i<23; i++){
             for(int j=0; j<5; j++){
@@ -166,18 +231,18 @@ void gazeboCallback(const gazebo_msgs::LinkStates::ConstPtr& msg){
                 };
             }
         }
-        uav0_link_index = temp_index[0];    ROS_INFO_STREAM("[gazebo_cb] uav0_link_index=" << uav0_link_index);
-        uav1_link_index = temp_index[1];    ROS_INFO_STREAM("[gazebo_cb] uav1_link_index=" << uav1_link_index);
-        pend0_link_index = temp_index[2];   ROS_INFO_STREAM("[gazebo_cb] pend0_link_index=" << pend0_link_index);
-        pend1_link_index = temp_index[3];   ROS_INFO_STREAM("[gazebo_cb] pend0_link_index=" << pend1_link_index);
-        load_link_index = temp_index[4];    ROS_INFO_STREAM("[gazebo_cb] load_link_index=" << load_link_index);
+        uav0_link_index = temp_index[0];    ROS_INFO_STREAM("[gazeboCb] uav0_link_index=" << uav0_link_index);
+        uav1_link_index = temp_index[1];    ROS_INFO_STREAM("[gazeboCb] uav1_link_index=" << uav1_link_index);
+        pend0_link_index = temp_index[2];   ROS_INFO_STREAM("[gazeboCb] pend0_link_index=" << pend0_link_index);
+        pend1_link_index = temp_index[3];   ROS_INFO_STREAM("[gazeboCb] pend0_link_index=" << pend1_link_index);
+        load_link_index = temp_index[4];    ROS_INFO_STREAM("[gazeboCb] load_link_index=" << load_link_index);
         gazebo_link_name_matched = true;
-        ROS_INFO("[gazebo_cb] Matching Complete");
+        ROS_INFO("[gazeboCb] Matching Complete");
     }
 
     double diff_time; // = 0.5;
     diff_time = (ros::Time::now().toSec() - gazebo_last_called); // gives nan or inf sometimes
-    ROS_INFO_STREAM("diff_time:" << diff_time);
+    // ROS_INFO_STREAM("diff_time:" << diff_time);
     gazebo_last_called = ros::Time::now().toSec();
 
     
@@ -235,36 +300,27 @@ void gazeboCallback(const gazebo_msgs::LinkStates::ConstPtr& msg){
     }
 
     // system state msg
-    state18.dsls_state[0] = load_pose.pose.position.x;
-    state18.dsls_state[1] = load_pose.pose.position.y;
-    state18.dsls_state[2] = load_pose.pose.position.z;
-    state18.dsls_state[3] = pend0_q.x;
-    state18.dsls_state[4] = pend0_q.y;
-    state18.dsls_state[5] = pend0_q.z;
-    state18.dsls_state[6] = pend1_q.x;
-    state18.dsls_state[7] = pend1_q.y;
-    state18.dsls_state[8] = pend1_q.z;
-    state18.dsls_state[9] = load_twist.twist.linear.x;
-    state18.dsls_state[10] = load_twist.twist.linear.y;
-    state18.dsls_state[11] = load_twist.twist.linear.z; 
-    state18.dsls_state[12] = pend0_omega.x;
-    state18.dsls_state[13] = pend0_omega.y;
-    state18.dsls_state[14] = pend0_omega.z;
-    state18.dsls_state[15] = pend1_omega.x;
-    state18.dsls_state[16] = pend1_omega.y;
-    state18.dsls_state[17] = pend1_omega.z;   
+    state18.state18[0] = load_pose.pose.position.x;
+    state18.state18[1] = load_pose.pose.position.y;
+    state18.state18[2] = load_pose.pose.position.z;
+    state18.state18[3] = pend0_q.x;
+    state18.state18[4] = pend0_q.y;
+    state18.state18[5] = pend0_q.z;
+    state18.state18[6] = pend1_q.x;
+    state18.state18[7] = pend1_q.y;
+    state18.state18[8] = pend1_q.z;
+    state18.state18[9] = load_twist.twist.linear.x;
+    state18.state18[10] = load_twist.twist.linear.y;
+    state18.state18[11] = load_twist.twist.linear.z; 
+    state18.state18[12] = pend0_omega.x;
+    state18.state18[13] = pend0_omega.y;
+    state18.state18[14] = pend0_omega.z;
+    state18.state18[15] = pend1_omega.x;
+    state18.state18[16] = pend1_omega.y;
+    state18.state18[17] = pend1_omega.z;   
     state18.header.stamp = ros::Time::now();
 
     //else ROS_INFO_STREAM('Time step too small, skipping...');
-}
-
-void apply_outerloop_control(double Kv6[6], double setpoint[6]){
-    double M_QUAD = 1.55;
-    double controller_output[3];
-    controller_output[0] = (-Kv6[0] * (uav1_pose.pose.position.x - setpoint[0]) - Kv6[3] * (uav1_twist.twist.linear.x - setpoint[3]))*M_QUAD;
-    controller_output[1] = (-Kv6[1] * (uav1_pose.pose.position.y - setpoint[1]) - Kv6[4] * (uav1_twist.twist.linear.y - setpoint[4]))*M_QUAD;
-    controller_output[2] = (-Kv6[2] * (uav1_pose.pose.position.z - setpoint[2]) - Kv6[5] * (uav1_twist.twist.linear.z - setpoint[5]) - 9.81)*M_QUAD;
-    force_rate_convert(controller_output, attitude);
 }
 
 void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude){
@@ -323,3 +379,47 @@ geometry_msgs::Vector3 crossProduct(const geometry_msgs::Vector3 v1, geometry_ms
     result.z = v1.x * v2.y - v1.y * v2.x; 
     return result; 
 }
+
+void applyQuadController(double Kv6[6], double setpoint[6]){
+    double M_QUAD = 1.55;
+    double controller_output[3];
+    controller_output[0] = (-Kv6[0] * (uav1_pose.pose.position.x - setpoint[0]) - Kv6[3] * (uav1_twist.twist.linear.x - setpoint[3]))*M_QUAD;
+    controller_output[1] = (-Kv6[1] * (uav1_pose.pose.position.y - setpoint[1]) - Kv6[4] * (uav1_twist.twist.linear.y - setpoint[4]))*M_QUAD;
+    controller_output[2] = (-Kv6[2] * (uav1_pose.pose.position.z - setpoint[2]) - Kv6[5] * (uav1_twist.twist.linear.z - setpoint[5]) - 9.81)*M_QUAD;
+    force_rate_convert(controller_output, attitude);
+}
+
+void applyDEAController(double_sls_controller::DSlsState state18, double_sls_controller::DEAState dea_xi4, const double dea_k[24], const double dea_param[4], const double dea_ref[13]){
+    /* Getting Full State */
+    double state22[22] = {};
+    for(int i = 0; i < 22; i++){
+        if(i < 18) state22[i] = state18.state18[i];
+        else if(i < 22) state22[i] = dea_xi4.dea_xi4[i-18];
+    }
+
+    /* Apply Controller */
+    double F1[3];
+    double F2[3];
+    double xi_dot[4];
+    double sys_output[24];
+    DEAController(state22, dea_k, dea_param, dea_ref, ros::Time::now().toSec(), F1, F2, xi_dot, sys_output);
+
+    /* Infill DEA Force Msg */
+    dea_force.header.stamp = ros::Time::now();
+    dea_force.vector.x = F2[0];
+    dea_force.vector.y = F2[1];
+    dea_force.vector.z = F2[2];
+
+    force_rate_convert(F2, attitude);
+
+    /* Controller State Integration */
+    double diff_time;
+    diff_time = (ros::Time::now().toSec() - controller_last_called);
+    controller_last_called = ros::Time::now().toSec(); //works well, gives 0.02
+
+    for(int j = 0; j < 4; j ++){
+        dea_xi4.header.stamp = ros::Time::now();
+        dea_xi4.dea_xi4[j] += xi_dot[j]*diff_time;
+    }
+}
+

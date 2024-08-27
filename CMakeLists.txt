@@ -31,6 +31,7 @@ add_message_files(
   AttOut.msg
   PendAngle.msg
   DSlsState.msg
+  DEAState.msg
 )
 
 generate_messages(
