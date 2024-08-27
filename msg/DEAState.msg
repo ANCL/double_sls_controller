@@ -1,3 +1,3 @@
 #sls_state
 std_msgs/Header header
-float64[18] state18
+float64[4] dea_xi4

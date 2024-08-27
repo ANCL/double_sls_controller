@@ -32,6 +32,7 @@ add_message_files(
   AttOut.msg
   PendAngle.msg
   DSlsState.msg
+  DEAState.msg
 )
 
 generate_messages(
@@ -117,6 +118,7 @@ target_link_libraries(double_sls_uav1_node ${PROJECT_NAME} ${catkin_LIBRARIES})
 add_subdirectory(src/StabController)
 add_subdirectory(src/TracController)
 add_subdirectory(src/QuadSLS_PT_Controller_QSF)
+add_subdirectory(src/DEAController)
 
 target_link_libraries(get_states_node StabController)
 target_link_libraries(offb_control_node StabController)
@@ -125,6 +127,8 @@ target_link_libraries(offb_control_node TracController)
 target_link_libraries(get_states_node QuadSLS_PT_Controller_QSF)
 target_link_libraries(offb_control_node QuadSLS_PT_Controller_QSF)
 target_link_libraries(single_sls_controller_node QuadSLS_PT_Controller_QSF)
+target_link_libraries(double_sls_uav0_node DEAController)
+target_link_libraries(double_sls_uav1_node DEAController)
 
 
 #############
