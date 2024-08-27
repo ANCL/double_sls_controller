@@ -79,7 +79,7 @@
         </include>
     </group>
     <!-- Spawn Double Slung Load Model-->
-    <param name="double_slung_load" textfile="$(find offboard)/models/double_slung_load_point_mass/double_slung_load_point_mass.sdf" />
+    <param name="double_slung_load" textfile="$(find double_sls_controller)/models/double_slung_load_point_mass/double_slung_load_point_mass.sdf" />
     <node pkg="gazebo_ros" type="spawn_model" name="model" args="-sdf -model slung_load -param double_slung_load" />
     <!-- Connect quadrotor and the models -->
     <node pkg="gazebo_ros_link_attacher" name="attacher" type="attach_sls.py" output="screen" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@'" /> 
