@@ -37,7 +37,7 @@ catkin build
 ```
 ### 5. Move the Link Attacher Script
 ```
-sudo mv ~/catkin_ws/src/double_sls_controller/scripts/attach_sls.py ~/catkin_ws/src/gazebo_ros_link_attacher/scripts/attach_sls.py
+sudo cp ~/catkin_ws/src/double_sls_controller/scripts/attach_sls.py ~/catkin_ws/src/gazebo_ros_link_attacher/scripts/attach_sls.py
 ```   
 ### 6. Install XMLStarlet if not already done
 ```
