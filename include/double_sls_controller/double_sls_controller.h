@@ -55,6 +55,6 @@
     void gazeboCallback(const gazebo_msgs::LinkStates::ConstPtr& msg);
 #endif
 
-
+bool gotime;
 
 #endif

@@ -66,6 +66,8 @@ roslaunch double_sls_controller double_px4vision_sls_world.launch
 # in a new terminal
 rosrun gazebo_ros_link_attacher attach_sls.py
 ```
+Then unpause the simulation:
+![Alt text](Images/Pause.png)
 ### 3. Run QGroundControl
 ```
 # in a new terminal
