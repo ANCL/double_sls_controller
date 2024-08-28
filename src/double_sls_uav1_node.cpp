@@ -84,8 +84,6 @@ void pubDebugData(
     dea_force_pub.publish(dea_force);
 }
 
-double dea_k[24] = {};
-
 void callback(double_sls_controller::configConfig &config, uint32_t level) {
    dea_k[0] = config.dea_k_0;
    dea_k[1] = config.dea_k_1;
@@ -136,11 +134,11 @@ int main(int argc, char **argv){
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(50.0);
 
-    dynamic_reconfigure::Server<double_sls_controller::configConfig> server;
-    dynamic_reconfigure::Server<double_sls_controller::configConfig>::CallbackType f;
+    // dynamic_reconfigure::Server<double_sls_controller::configConfig> server;
+    // dynamic_reconfigure::Server<double_sls_controller::configConfig>::CallbackType f;
     
-    f = boost::bind(&callback, _1, _2);
-    server.setCallback(f);
+    // f = boost::bind(&callback, _1, _2);
+    // server.setCallback(f);
 
     double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
     double setpoint[6] = {0, 1.0, -1.0, 0, 0, 0};
@@ -197,6 +195,13 @@ int main(int argc, char **argv){
     while(ros::ok()){
 
         nh.getParam("/double_sls_controller/dea_enabled", dea_enabled);
+        nh.getParam("bool", gotime);
+        
+        std::vector<double> dea_k_vec;
+        nh.getParam("dea_k24", dea_k_vec);
+        for(size_t i=0; i < 24; ++i){
+            dea_k[i] = dea_k_vec[i];
+        }
 
         if( current_state.mode != "OFFBOARD" &&
             (ros::Time::now() - last_request > ros::Duration(5.0))){
@@ -216,7 +221,7 @@ int main(int argc, char **argv){
             }
         }
 
-        if(dea_enabled){
+        if(gotime){
             ROS_INFO_STREAM("Running DEA...");
             applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
             attitude.header.stamp = ros::Time::now();

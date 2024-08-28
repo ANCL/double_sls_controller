@@ -84,38 +84,7 @@ void pubDebugData(
     dea_force_pub.publish(dea_force);
 }
 
-double dea_k[24] = {};
 
-void callback(double_sls_controller::configConfig &config, uint32_t level) {
-   dea_k[0] = config.dea_k_0;
-   dea_k[1] = config.dea_k_1;
-   dea_k[2] = config.dea_k_2;
-   dea_k[3] = config.dea_k_3;
-   dea_k[4] = config.dea_k_4;
-   dea_k[5] = config.dea_k_5;
-   dea_k[6] = config.dea_k_6;
-   dea_k[7] = config.dea_k_7;
-   dea_k[8] = config.dea_k_8;
-   dea_k[9] = config.dea_k_9;
-   dea_k[10] = config.dea_k_10;
-   dea_k[11] = config.dea_k_11;
-   dea_k[12] = config.dea_k_12;
-   dea_k[13] = config.dea_k_13;
-   dea_k[14] = config.dea_k_14;
-   dea_k[15] = config.dea_k_15;
-   dea_k[16] = config.dea_k_16;
-   dea_k[17] = config.dea_k_17;
-   dea_k[18] = config.dea_k_18;
-   dea_k[19] = config.dea_k_19;
-   dea_k[20] = config.dea_k_20;
-   dea_k[21] = config.dea_k_21;
-   dea_k[22] = config.dea_k_22;
-   dea_k[23] = config.dea_k_23;
-
-   for(int j = 0; j < 24; j++){
-       ROS_INFO_STREAM(dea_k[j]);
-    }
-}
 
 
 int main(int argc, char **argv){
@@ -137,11 +106,11 @@ int main(int argc, char **argv){
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(50.0);
 
-    dynamic_reconfigure::Server<double_sls_controller::configConfig> server;
-    dynamic_reconfigure::Server<double_sls_controller::configConfig>::CallbackType f;
+    // dynamic_reconfigure::Server<double_sls_controller::configConfig> server;
+    // dynamic_reconfigure::Server<double_sls_controller::configConfig>::CallbackType f;
     
-    f = boost::bind(&callback, _1, _2);
-    server.setCallback(f);
+    // f = boost::bind(&callback, _1, _2);
+    // server.setCallback(f);
 
     double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
     double setpoint[6] = {0, -1.0, -1.0, 0, 0, 0};
@@ -200,6 +169,12 @@ int main(int argc, char **argv){
         nh.getParam("/double_sls_controller/dea_enabled", dea_enabled);
         nh.getParam("bool", gotime);
 
+        std::vector<double> dea_k_vec;
+        nh.getParam("dea_k24", dea_k_vec);
+        for(size_t i=0; i < 24; ++i){
+            dea_k[i] = dea_k_vec[i];
+        }
+
         if( current_state.mode != "OFFBOARD" &&
             (ros::Time::now() - last_request > ros::Duration(5.0))){
             if( set_mode_client.call(offb_set_mode) &&
@@ -218,19 +193,11 @@ int main(int argc, char **argv){
             }
         }
 
-        if(dea_enabled){
+        if(gotime){
             ROS_INFO_STREAM("Running DEA...");
-            if(gotime){
-                applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
-                attitude.header.stamp = ros::Time::now();
-                attitude_setpoint_pub.publish(attitude_dea); 
-            }
-            else{
-                applyQuadController(Kv6, setpoint); 
-                attitude.header.stamp = ros::Time::now();
-                attitude_setpoint_pub.publish(attitude);
-                applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
-            }
+            applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
+            attitude.header.stamp = ros::Time::now();
+            attitude_setpoint_pub.publish(attitude_dea); 
         }
         else{
             ROS_INFO_STREAM("Running Quad...");

@@ -29,6 +29,9 @@
 #include <double_sls_controller/AttOut.h>
 #include <double_sls_controller/PendAngle.h>
 
+#include <double_sls_controller/configConfig.h>
+#include <double_sls_controller/double_sls_controller.h>
+
 #define SITL_ENABLED true
 #if SITL_ENABLED
     #include <gazebo_msgs/LinkStates.h>
@@ -56,5 +59,9 @@
 #endif
 
 bool gotime;
+
+double dea_k[24];
+
+void callback(double_sls_controller::configConfig &config, uint32_t level);
 
 #endif
