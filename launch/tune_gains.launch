@@ -1,3 +1,9 @@
 <launch>
-    <rosparam command="load" file="$(find double_sls_controller)/cfg/gains.yaml" />
+    <group ns="uav0">
+        <rosparam command="load" file="$(find double_sls_controller)/cfg/gains.yaml" />
+    </group>
+
+    <group ns="uav1">
+        <rosparam command="load" file="$(find double_sls_controller)/cfg/gains.yaml" />
+    </group>
 </launch>

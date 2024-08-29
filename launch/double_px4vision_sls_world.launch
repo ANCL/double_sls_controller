@@ -48,6 +48,7 @@
             <arg name="tgt_system" value="$(eval 1 + arg('ID'))"/>
             <arg name="tgt_component" value="1"/>
         </include>
+        <rosparam command="load" file="$(find double_sls_controller)/cfg/double_sls_controller_params.yaml" />
     </group>
     <!-- UAV1 -->
     <group ns="uav1">
@@ -77,6 +78,7 @@
             <arg name="tgt_system" value="$(eval 1 + arg('ID'))"/>
             <arg name="tgt_component" value="1"/>
         </include>
+        <rosparam command="load" file="$(find double_sls_controller)/cfg/double_sls_controller_params.yaml" />
     </group>
     <!-- Spawn Double Slung Load Model-->
     <param name="double_slung_load" textfile="$(find double_sls_controller)/models/double_slung_load_point_mass/double_slung_load_point_mass.sdf" />
@@ -84,7 +86,6 @@
     <!-- Connect quadrotor and the models -->
     <node pkg="gazebo_ros_link_attacher" name="attacher" type="attach_sls.py" output="screen" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@'" /> 
     <!-- Parameter Server -->
-    <rosparam command="load" file="$(find double_sls_controller)/cfg/double_sls_controller_params.yaml" />
 
 </launch>
 <!-- to add more UAVs (up to 10):
