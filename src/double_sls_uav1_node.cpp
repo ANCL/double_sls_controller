@@ -26,6 +26,7 @@ mavros_msgs::AttitudeTarget attitude;
 mavros_msgs::AttitudeTarget attitude_dea;
 double_sls_controller::DSlsState state18;
 double_sls_controller::DEAState dea_xi4;
+
 double gazebo_last_called;
 double controller_last_called;
 
@@ -33,7 +34,7 @@ void stateCb(const mavros_msgs::State::ConstPtr& msg);
 void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg);
 void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude);
 void applyQuadController(double Kv6[6], double setpoint[6]);
-void applyDEAController(double_sls_controller::DSlsState state18, double_sls_controller::DEAState dea_xi4, const double dea_k[24], const double dea_param[4], const double ref[13]);
+void applyDEAController(double_sls_controller::DSlsState state18, double_sls_controller::DEAState &dea_xi4, const double dea_k[24], const double dea_param[4], const double ref[13]);
 geometry_msgs::Vector3 crossProduct(const geometry_msgs::Vector3 v1, geometry_msgs::Vector3 v2);
 
 /* Gazebo Index Matching */
@@ -115,6 +116,8 @@ int main(int argc, char **argv){
     double dea_k[24] = {};
     const double dea_param[4] = {1.55, 0.25, 0.85, 9.81};
     const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.85, 0, 90};
+
+
     
     for(int i = 0; i < 4; i++){
         dea_k[0 + i*6] = dea_k1[i];
@@ -130,7 +133,7 @@ int main(int argc, char **argv){
     }
 
     dea_xi4.dea_xi4[0] = -9.81;
-    dea_xi4.dea_xi4[1] = -9.81/2;
+    dea_xi4.dea_xi4[1] = -9.81*0.95;
     dea_xi4.dea_xi4[2] = 0;
     dea_xi4.dea_xi4[3] = 0;
 
@@ -142,7 +145,7 @@ int main(int argc, char **argv){
 
     geometry_msgs::PoseStamped pose;
     pose.pose.position.x = 0;
-    pose.pose.position.y = 0.7;
+    pose.pose.position.y = -0.8;
     pose.pose.position.z = 2.0;
 
     //send a few setpoints before starting
@@ -159,7 +162,7 @@ int main(int argc, char **argv){
     arm_cmd.request.value = true;
 
     ros::Time last_request = ros::Time::now();
-
+    ros::Time node_start_time = ros::Time::now();
     while(ros::ok()){
 
         nh.getParam("/double_sls_controller/dea_enabled", dea_enabled);
@@ -196,6 +199,9 @@ int main(int argc, char **argv){
             applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
         }
         
+        // if(ros::Time::now() - node_start_time >ros::Duration(10.0)){
+        //     dea_enabled = true;
+        // }
         
         
 
@@ -389,7 +395,14 @@ void applyQuadController(double Kv6[6], double setpoint[6]){
     force_rate_convert(controller_output, attitude);
 }
 
-void applyDEAController(double_sls_controller::DSlsState state18, double_sls_controller::DEAState dea_xi4, const double dea_k[24], const double dea_param[4], const double dea_ref[13]){
+void applyDEAController(
+    double_sls_controller::DSlsState state18, 
+    double_sls_controller::DEAState &dea_xi4, 
+    const double dea_k[24], 
+    const double dea_param[4], 
+    const double dea_ref[13]
+    ){
+
     /* Getting Full State */
     double state22[22] = {};
     for(int i = 0; i < 22; i++){
@@ -410,16 +423,17 @@ void applyDEAController(double_sls_controller::DSlsState state18, double_sls_con
     dea_force.vector.y = F2[1];
     dea_force.vector.z = F2[2];
 
-    force_rate_convert(F2, attitude);
+    force_rate_convert(F2, attitude_dea);
 
     /* Controller State Integration */
     double diff_time;
     diff_time = (ros::Time::now().toSec() - controller_last_called);
     controller_last_called = ros::Time::now().toSec(); //works well, gives 0.02
-
+    // if(dea_enabled){
     for(int j = 0; j < 4; j ++){
         dea_xi4.header.stamp = ros::Time::now();
-        dea_xi4.dea_xi4[j] += xi_dot[j]*diff_time;
-    }
+        dea_xi4.dea_xi4[j] += xi_dot[j]*diff_time; // Euler, should be replaced with RK4
+        }        
+    // }
 }
 

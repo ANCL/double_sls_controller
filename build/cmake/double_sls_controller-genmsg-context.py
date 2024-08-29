@@ -1,6 +1,6 @@
 # generated from genmsg/cmake/pkg-genmsg.context.in
 
-messages_str = "/home/zichen/catkin_ws/src/double_sls_controller/msg/PTStates.msg;/home/zichen/catkin_ws/src/double_sls_controller/msg/ActuatorControl0.msg;/home/zichen/catkin_ws/src/double_sls_controller/msg/AttOut.msg;/home/zichen/catkin_ws/src/double_sls_controller/msg/PendAngle.msg"
+messages_str = "/home/zichen/catkin_ws/src/double_sls_controller/msg/PTStates.msg;/home/zichen/catkin_ws/src/double_sls_controller/msg/ActuatorControl0.msg;/home/zichen/catkin_ws/src/double_sls_controller/msg/AttOut.msg;/home/zichen/catkin_ws/src/double_sls_controller/msg/PendAngle.msg;/home/zichen/catkin_ws/src/double_sls_controller/msg/DSlsState.msg;/home/zichen/catkin_ws/src/double_sls_controller/msg/DEAState.msg"
 services_str = ""
 pkg_name = "double_sls_controller"
 dependencies_str = "geometry_msgs;std_msgs"

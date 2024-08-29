@@ -1,6 +1,6 @@
 # generated from genmsg/cmake/pkg-genmsg.cmake.em
 
-message(STATUS "double_sls_controller: 4 messages, 0 services")
+message(STATUS "double_sls_controller: 6 messages, 0 services")
 
 set(MSG_I_FLAGS "-Idouble_sls_controller:/home/zichen/catkin_ws/src/double_sls_controller/msg;-Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg;-Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg")
 
@@ -37,6 +37,16 @@ add_custom_target(_double_sls_controller_generate_messages_check_deps_${_filenam
   COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "double_sls_controller" "/home/zichen/catkin_ws/src/double_sls_controller/msg/PendAngle.msg" "std_msgs/Header"
 )
 
+get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/DSlsState.msg" NAME_WE)
+add_custom_target(_double_sls_controller_generate_messages_check_deps_${_filename}
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "double_sls_controller" "/home/zichen/catkin_ws/src/double_sls_controller/msg/DSlsState.msg" "std_msgs/Header"
+)
+
+get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/DEAState.msg" NAME_WE)
+add_custom_target(_double_sls_controller_generate_messages_check_deps_${_filename}
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "double_sls_controller" "/home/zichen/catkin_ws/src/double_sls_controller/msg/DEAState.msg" "std_msgs/Header"
+)
+
 #
 #  langs = gencpp;geneus;genlisp;gennodejs;genpy
 #
@@ -67,6 +77,18 @@ _generate_msg_cpp(double_sls_controller
   "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/double_sls_controller
 )
+_generate_msg_cpp(double_sls_controller
+  "/home/zichen/catkin_ws/src/double_sls_controller/msg/DSlsState.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/double_sls_controller
+)
+_generate_msg_cpp(double_sls_controller
+  "/home/zichen/catkin_ws/src/double_sls_controller/msg/DEAState.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/double_sls_controller
+)
 
 ### Generating Services
 
@@ -89,6 +111,10 @@ add_dependencies(double_sls_controller_generate_messages_cpp _double_sls_control
 get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/AttOut.msg" NAME_WE)
 add_dependencies(double_sls_controller_generate_messages_cpp _double_sls_controller_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/PendAngle.msg" NAME_WE)
+add_dependencies(double_sls_controller_generate_messages_cpp _double_sls_controller_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/DSlsState.msg" NAME_WE)
+add_dependencies(double_sls_controller_generate_messages_cpp _double_sls_controller_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/DEAState.msg" NAME_WE)
 add_dependencies(double_sls_controller_generate_messages_cpp _double_sls_controller_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
@@ -124,6 +150,18 @@ _generate_msg_eus(double_sls_controller
   "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/double_sls_controller
 )
+_generate_msg_eus(double_sls_controller
+  "/home/zichen/catkin_ws/src/double_sls_controller/msg/DSlsState.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/double_sls_controller
+)
+_generate_msg_eus(double_sls_controller
+  "/home/zichen/catkin_ws/src/double_sls_controller/msg/DEAState.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/double_sls_controller
+)
 
 ### Generating Services
 
@@ -146,6 +184,10 @@ add_dependencies(double_sls_controller_generate_messages_eus _double_sls_control
 get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/AttOut.msg" NAME_WE)
 add_dependencies(double_sls_controller_generate_messages_eus _double_sls_controller_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/PendAngle.msg" NAME_WE)
+add_dependencies(double_sls_controller_generate_messages_eus _double_sls_controller_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/DSlsState.msg" NAME_WE)
+add_dependencies(double_sls_controller_generate_messages_eus _double_sls_controller_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/DEAState.msg" NAME_WE)
 add_dependencies(double_sls_controller_generate_messages_eus _double_sls_controller_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
@@ -181,6 +223,18 @@ _generate_msg_lisp(double_sls_controller
   "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/double_sls_controller
 )
+_generate_msg_lisp(double_sls_controller
+  "/home/zichen/catkin_ws/src/double_sls_controller/msg/DSlsState.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/double_sls_controller
+)
+_generate_msg_lisp(double_sls_controller
+  "/home/zichen/catkin_ws/src/double_sls_controller/msg/DEAState.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/double_sls_controller
+)
 
 ### Generating Services
 
@@ -203,6 +257,10 @@ add_dependencies(double_sls_controller_generate_messages_lisp _double_sls_contro
 get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/AttOut.msg" NAME_WE)
 add_dependencies(double_sls_controller_generate_messages_lisp _double_sls_controller_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/PendAngle.msg" NAME_WE)
+add_dependencies(double_sls_controller_generate_messages_lisp _double_sls_controller_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/DSlsState.msg" NAME_WE)
+add_dependencies(double_sls_controller_generate_messages_lisp _double_sls_controller_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/DEAState.msg" NAME_WE)
 add_dependencies(double_sls_controller_generate_messages_lisp _double_sls_controller_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
@@ -238,6 +296,18 @@ _generate_msg_nodejs(double_sls_controller
   "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/double_sls_controller
 )
+_generate_msg_nodejs(double_sls_controller
+  "/home/zichen/catkin_ws/src/double_sls_controller/msg/DSlsState.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/double_sls_controller
+)
+_generate_msg_nodejs(double_sls_controller
+  "/home/zichen/catkin_ws/src/double_sls_controller/msg/DEAState.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/double_sls_controller
+)
 
 ### Generating Services
 
@@ -260,6 +330,10 @@ add_dependencies(double_sls_controller_generate_messages_nodejs _double_sls_cont
 get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/AttOut.msg" NAME_WE)
 add_dependencies(double_sls_controller_generate_messages_nodejs _double_sls_controller_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/PendAngle.msg" NAME_WE)
+add_dependencies(double_sls_controller_generate_messages_nodejs _double_sls_controller_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/DSlsState.msg" NAME_WE)
+add_dependencies(double_sls_controller_generate_messages_nodejs _double_sls_controller_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/DEAState.msg" NAME_WE)
 add_dependencies(double_sls_controller_generate_messages_nodejs _double_sls_controller_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
@@ -295,6 +369,18 @@ _generate_msg_py(double_sls_controller
   "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/double_sls_controller
 )
+_generate_msg_py(double_sls_controller
+  "/home/zichen/catkin_ws/src/double_sls_controller/msg/DSlsState.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/double_sls_controller
+)
+_generate_msg_py(double_sls_controller
+  "/home/zichen/catkin_ws/src/double_sls_controller/msg/DEAState.msg"
+  "${MSG_I_FLAGS}"
+  "/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/double_sls_controller
+)
 
 ### Generating Services
 
@@ -317,6 +403,10 @@ add_dependencies(double_sls_controller_generate_messages_py _double_sls_controll
 get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/AttOut.msg" NAME_WE)
 add_dependencies(double_sls_controller_generate_messages_py _double_sls_controller_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/PendAngle.msg" NAME_WE)
+add_dependencies(double_sls_controller_generate_messages_py _double_sls_controller_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/DSlsState.msg" NAME_WE)
+add_dependencies(double_sls_controller_generate_messages_py _double_sls_controller_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/zichen/catkin_ws/src/double_sls_controller/msg/DEAState.msg" NAME_WE)
 add_dependencies(double_sls_controller_generate_messages_py _double_sls_controller_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
