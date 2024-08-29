@@ -10,6 +10,8 @@
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
+#include <dynamic_reconfigure/server.h>
+#include <double_sls_controller/configConfig.h>
 #include <double_sls_controller/double_sls_controller.h>
 #include <double_sls_controller/common.h>
 #include <double_sls_controller/control.h>
@@ -83,6 +85,9 @@ void pubDebugData(
     dea_force_pub.publish(dea_force);
 }
 
+
+
+
 int main(int argc, char **argv){
 
     /* ROS Node Utilities */
@@ -102,7 +107,11 @@ int main(int argc, char **argv){
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(50.0);
 
-
+    // dynamic_reconfigure::Server<double_sls_controller::configConfig> server;
+    // dynamic_reconfigure::Server<double_sls_controller::configConfig>::CallbackType f;
+    
+    // f = boost::bind(&callback, _1, _2);
+    // server.setCallback(f);
 
     double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
     double setpoint[6] = {0, -1.0, -1.0, 0, 0, 0};
@@ -113,24 +122,20 @@ int main(int argc, char **argv){
     const double dea_k4[4] = {2.0000,    3.0000,         0,         0};
     const double dea_k5[4] = {2.0000,    3.0000,         0,         0};
     const double dea_k6[4] = {2.0000,    3.0000,         0,         0};
-    double dea_k[24] = {};
+    //not global variables
     const double dea_param[4] = {1.55, 0.25, 0.85, 9.81};
     const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.85, 0, 90};
 
 
     
-    for(int i = 0; i < 4; i++){
-        dea_k[0 + i*6] = dea_k1[i];
-        dea_k[1 + i*6] = dea_k2[i];
-        dea_k[2 + i*6] = dea_k3[i];
-        dea_k[3 + i*6] = dea_k4[i];
-        dea_k[4 + i*6] = dea_k5[i];
-        dea_k[5 + i*6] = dea_k6[i];
-    }
-
-    for(int j = 0; j < 24; j++){
-        ROS_INFO_STREAM(dea_k[j]);
-    }
+    // for(int i = 0; i < 4; i++){
+    //     dea_k[0 + i*6] = dea_k1[i];
+    //     dea_k[1 + i*6] = dea_k2[i];
+    //     dea_k[2 + i*6] = dea_k3[i];
+    //     dea_k[3 + i*6] = dea_k4[i];
+    //     dea_k[4 + i*6] = dea_k5[i];
+    //     dea_k[5 + i*6] = dea_k6[i];
+    // }
 
     dea_xi4.dea_xi4[0] = -9.81;
     dea_xi4.dea_xi4[1] = -9.81*0.95;
@@ -166,6 +171,13 @@ int main(int argc, char **argv){
     while(ros::ok()){
 
         nh.getParam("/double_sls_controller/dea_enabled", dea_enabled);
+        nh.getParam("bool", gotime);
+
+        std::vector<double> dea_k_vec;
+        nh.getParam("dea_k24", dea_k_vec);
+        for(size_t i=0; i < 24; ++i){
+            dea_k[i] = dea_k_vec[i];
+        }
 
         if( current_state.mode != "OFFBOARD" &&
             (ros::Time::now() - last_request > ros::Duration(5.0))){
@@ -185,14 +197,15 @@ int main(int argc, char **argv){
             }
         }
 
-        if(dea_enabled){
+        if(gotime){
             ROS_INFO_STREAM("Running DEA...");
             applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
             attitude.header.stamp = ros::Time::now();
             attitude_setpoint_pub.publish(attitude_dea); 
         }
         else{
-            ROS_INFO_STREAM("Running Quad...");
+            //ROS_INFO_STREAM("Running Quad...");
+            ROS_INFO_STREAM(dea_k[0]);
             applyQuadController(Kv6, setpoint); 
             attitude.header.stamp = ros::Time::now();
             attitude_setpoint_pub.publish(attitude); 

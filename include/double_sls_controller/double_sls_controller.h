@@ -29,38 +29,39 @@
 #include <double_sls_controller/AttOut.h>
 #include <double_sls_controller/PendAngle.h>
 
+#include <double_sls_controller/configConfig.h>
+#include <double_sls_controller/double_sls_controller.h>
+
 #define SITL_ENABLED true
 #if SITL_ENABLED
     #include <gazebo_msgs/LinkStates.h>
 #endif
 
+// /* SLS0 */
+// geometry_msgs::PoseStamped uav0_pose, uav0_pose_last;
+// geometry_msgs::TwistStamped uav0_twist;
+// geometry_msgs::PoseStamped pend0_pose;
+// geometry_msgs::TwistStamped pend0_twist;
+// double_sls_controller::PendAngle pend0_angle;
 
-class DoubleSLSController{
-    private:
-        ros::NodeHandle nh_;
-        ros::NodeHandle nh_private_;
-        ros::Subscriber mav_state_sub_;
-        ros::Publisher local_pos_pub_;
-        ros::ServiceClient arming_client_;
-        ros::ServiceClient set_mode_client_;
-        // ros::Rate rate(20.0);
-        ros::Timer cmdloop_timer_, statusloop_timer_;
-        ros::Time last_request_, reference_request_now_, reference_request_last_;
+// /* SLS1 */
+// geometry_msgs::PoseStamped uav1_pose;
+// geometry_msgs::TwistStamped uav1_twist;
+// geometry_msgs::PoseStamped pend1_pose;
+// geometry_msgs::TwistStamped pend1_twist;
 
-        mavros_msgs::State current_state_;
-        void mav_state_cb(const mavros_msgs::State::ConstPtr &msg);
-        void statusloopCallback(const ros::TimerEvent &event);
-        void pubDefaultSetpoint(void);
+/* Payload */
+// geometry_msgs::PoseStamped load_pose, load_pose_last;
+// geometry_msgs::TwistStamped load_vel;
 
-        // mavros_msgs::SetMode offb_set_mode;
-        mavros_msgs::CommandBool arm_cmd_;
-        geometry_msgs::PoseStamped pose;
-        mavros_msgs::SetMode offb_set_mode;        
-        enum FlightState { WAITING_FOR_HOME_POSE, MISSION_EXECUTION, LANDING, LANDED } node_state;
-    public:
-        DoubleSLSController(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private);
-        virtual ~DoubleSLSController();
-};
+#if SITL_ENABLED
+    void gazeboCallback(const gazebo_msgs::LinkStates::ConstPtr& msg);
+#endif
 
+bool gotime;
+
+double dea_k[24];
+
+void callback(double_sls_controller::configConfig &config, uint32_t level);
 
 #endif
