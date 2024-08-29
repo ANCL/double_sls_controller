@@ -201,7 +201,8 @@ int main(int argc, char **argv){
             attitude_setpoint_pub.publish(attitude_dea); 
         }
         else{
-            ROS_INFO_STREAM("Running Quad...");
+            //ROS_INFO_STREAM("Running Quad...");
+            ROS_INFO_STREAM(dea_k[0]);
             applyQuadController(Kv6, setpoint); 
             attitude.header.stamp = ros::Time::now();
             attitude_setpoint_pub.publish(attitude); 
