@@ -32,7 +32,7 @@ double gazebo_last_called;
 double controller_last_called;
 
 void stateCb(const mavros_msgs::State::ConstPtr& msg);
-void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg);
+void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* attitude_setpoint_pub);
 void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude);
 void applyQuadController(double Kv6[6], double setpoint[6]);
 void applyDEAController(double_sls_controller::DSlsState state18, double_sls_controller::DEAState dea_xi4, const double dea_k[24], const double dea_param[4], const double ref[13]);
@@ -102,7 +102,7 @@ int main(int argc, char **argv){
     ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool> ("/uav0/mavros/cmd/arming");
     ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode> ("/uav0/mavros/set_mode");
     // #if SITL_ENABLED
-        ros::Subscriber gazebo_state_sub = nh.subscribe<gazebo_msgs::LinkStates>("/gazebo/link_states", 10, gazeboCb);
+        ros::Subscriber gazebo_state_sub = nh.subscribe<gazebo_msgs::LinkStates>("/gazebo/link_states", 10, boost::bind(gazeboCb, _1, &attitude_setpoint_pub));
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(50.0);
 
@@ -194,7 +194,7 @@ int main(int argc, char **argv){
             }
         }
 
-        if(gotime){
+        /*if(gotime){
             ROS_INFO_STREAM("Running DEA...");
             applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
             attitude.header.stamp = ros::Time::now();
@@ -206,7 +206,7 @@ int main(int argc, char **argv){
             attitude.header.stamp = ros::Time::now();
             attitude_setpoint_pub.publish(attitude); 
             applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
-        }
+        }*/
         
         
         
@@ -231,7 +231,7 @@ void stateCb(const mavros_msgs::State::ConstPtr& msg){
     current_state = *msg;
 }
 
-void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg){
+void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* attitude_setpoint_pub){
     /* Match links on the first call*/
     if(!gazebo_link_name_matched){
         ROS_INFO("[gazeboCb] Matching Gazebo Links");
@@ -331,6 +331,8 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg){
     state18.state18[16] = pend1_omega.y;
     state18.state18[17] = pend1_omega.z;   
     state18.header.stamp = ros::Time::now();
+
+    attitude_setpoint_pub->publish(attitude);
 
     //else ROS_INFO_STREAM('Time step too small, skipping...');
 }
