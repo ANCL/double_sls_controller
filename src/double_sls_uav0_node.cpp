@@ -86,6 +86,8 @@ void pubDebugData(
 
 double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
 double setpoint[6] = {0, -1.0, -1.0, 0, 0, 0};
+const double dea_param[4] = {1.55, 0.25, 0.85, 9.81};
+const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.85, 0, 90};
 
 
 int main(int argc, char **argv){
@@ -123,8 +125,8 @@ int main(int argc, char **argv){
     const double dea_k5[4] = {2.0000,    3.0000,         0,         0};
     const double dea_k6[4] = {2.0000,    3.0000,         0,         0};
     //not global variables
-    const double dea_param[4] = {1.55, 0.25, 0.85, 9.81};
-    const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.85, 0, 90};
+    // const double dea_param[4] = {1.55, 0.25, 0.85, 9.81};
+    // const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.85, 0, 90};
     
     // for(int i = 0; i < 4; i++){
     //     dea_k[0 + i*6] = dea_k1[i];
@@ -333,9 +335,20 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* atti
     state18.state18[17] = pend1_omega.z;   
     state18.header.stamp = ros::Time::now();
 
-    applyQuadController(Kv6, setpoint); 
-    attitude.header.stamp = ros::Time::now();
-    attitude_setpoint_pub->publish(attitude);
+    //publisher
+    if(gotime){
+        ROS_INFO_STREAM("Running DEA...");
+        applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
+        attitude.header.stamp = ros::Time::now();
+        attitude_setpoint_pub->publish(attitude_dea); 
+    }
+    else{
+        ROS_INFO_STREAM("Running Quad...");
+        applyQuadController(Kv6, setpoint); 
+        attitude.header.stamp = ros::Time::now();
+        attitude_setpoint_pub->publish(attitude); 
+        applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
+    }
 
     //else ROS_INFO_STREAM('Time step too small, skipping...');
 }
