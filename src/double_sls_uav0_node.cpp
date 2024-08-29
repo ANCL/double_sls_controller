@@ -84,7 +84,8 @@ void pubDebugData(
     dea_force_pub.publish(dea_force);
 }
 
-
+double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
+double setpoint[6] = {0, -1.0, -1.0, 0, 0, 0};
 
 
 int main(int argc, char **argv){
@@ -112,8 +113,8 @@ int main(int argc, char **argv){
     // f = boost::bind(&callback, _1, _2);
     // server.setCallback(f);
 
-    double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
-    double setpoint[6] = {0, -1.0, -1.0, 0, 0, 0};
+    // double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
+    // double setpoint[6] = {0, -1.0, -1.0, 0, 0, 0};
     double dea_xi[4] = {0, 0, 0, 0}; //DEA controller state
     const double dea_k1[4] = {0.4025,    2.1325,    4.0800,   3.3500};
     const double dea_k2[4] = {0.4025,    2.1325,    4.0800,   3.3500};
@@ -332,6 +333,8 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* atti
     state18.state18[17] = pend1_omega.z;   
     state18.header.stamp = ros::Time::now();
 
+    applyQuadController(Kv6, setpoint); 
+    attitude.header.stamp = ros::Time::now();
     attitude_setpoint_pub->publish(attitude);
 
     //else ROS_INFO_STREAM('Time step too small, skipping...');
