@@ -121,6 +121,7 @@ int main(int argc, char **argv){
     const double dea_k4[4] = {2.0000,    3.0000,         0,         0};
     const double dea_k5[4] = {2.0000,    3.0000,         0,         0};
     const double dea_k6[4] = {2.0000,    3.0000,         0,         0};
+    //not global variables
     const double dea_param[4] = {1.55, 0.25, 0.85, 9.81};
     const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.85, 0, 90};
     
