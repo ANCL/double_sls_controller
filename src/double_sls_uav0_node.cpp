@@ -19,7 +19,7 @@
 #include <double_sls_controller/DEAState.h>
 #include <DEAController.h>
 
-#define MIN_DELTA_TIME 0.0001
+#define MIN_DELTA_TIME 1e-16
 #define L 0.85
 
 
@@ -86,9 +86,9 @@ void pubDebugData(
 }
 
 double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
-double setpoint[6] = {0, -1.0, -1.0, 0, 0, 0};
+double setpoint[6] = {0, -1.0, -0.8, 0, 0, 0};
 const double dea_param[4] = {1.55, 0.25, 0.85, 9.81};
-const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.85, 0, 90};
+const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.541, 0, 116};
 
 
 int main(int argc, char **argv){
@@ -361,8 +361,8 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* atti
 void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude){
     //temp
     double attctrl_tau_ = 0.3;
-    double thrust_norm_hover = 0.53;
-    double thrust_coeff = 10;  
+    double thrust_norm_hover = 0.538;
+    double thrust_coeff = 100;  
     double thrust_0 = 1.55*9.81;
 
     attitude.header.stamp = ros::Time::now();
@@ -445,6 +445,9 @@ void applyDEAController(
     double xi_dot[4];
     double sys_output[24];
     DEAController(state22, dea_k, dea_param, dea_ref, ros::Time::now().toSec(), F1, F2, xi_dot, sys_output);
+    for(int i = 0; i<4; i++){
+        ROS_INFO_STREAM("xi_dot-" << i << ":" << xi_dot[i]);
+    }
 
     /* Infill DEA Force Msg */
     dea_force.header.stamp = ros::Time::now();
