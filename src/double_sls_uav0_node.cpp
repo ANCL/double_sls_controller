@@ -33,7 +33,7 @@ double gazebo_last_called;
 double controller_last_called;
 
 void stateCb(const mavros_msgs::State::ConstPtr& msg);
-void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg);
+void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* attitude_setpoint_pub);
 void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude);
 void applyQuadController(double Kv6[6], double setpoint[6]);
 void applyDEAController(double_sls_controller::DSlsState state18, double_sls_controller::DEAState &dea_xi4, const double dea_k[24], const double dea_param[4], const double ref[13]);
@@ -85,7 +85,10 @@ void pubDebugData(
     dea_force_pub.publish(dea_force);
 }
 
-
+double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
+double setpoint[6] = {0, -1.0, -1.0, 0, 0, 0};
+const double dea_param[4] = {1.55, 0.25, 0.85, 9.81};
+const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.85, 0, 90};
 
 
 int main(int argc, char **argv){
@@ -103,7 +106,7 @@ int main(int argc, char **argv){
     ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool> ("/uav0/mavros/cmd/arming");
     ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode> ("/uav0/mavros/set_mode");
     // #if SITL_ENABLED
-        ros::Subscriber gazebo_state_sub = nh.subscribe<gazebo_msgs::LinkStates>("/gazebo/link_states", 10, gazeboCb);
+        ros::Subscriber gazebo_state_sub = nh.subscribe<gazebo_msgs::LinkStates>("/gazebo/link_states", 10, boost::bind(gazeboCb, _1, &attitude_setpoint_pub));
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(50.0);
 
@@ -113,8 +116,8 @@ int main(int argc, char **argv){
     // f = boost::bind(&callback, _1, _2);
     // server.setCallback(f);
 
-    double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
-    double setpoint[6] = {0, -1.0, -1.0, 0, 0, 0};
+    // double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
+    // double setpoint[6] = {0, -1.0, -1.0, 0, 0, 0};
     double dea_xi[4] = {0, 0, 0, 0}; //DEA controller state
     const double dea_k1[4] = {0.4025,    2.1325,    4.0800,   3.3500};
     const double dea_k2[4] = {0.4025,    2.1325,    4.0800,   3.3500};
@@ -123,10 +126,8 @@ int main(int argc, char **argv){
     const double dea_k5[4] = {2.0000,    3.0000,         0,         0};
     const double dea_k6[4] = {2.0000,    3.0000,         0,         0};
     //not global variables
-    const double dea_param[4] = {1.55, 0.25, 0.85, 9.81};
-    const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.85, 0, 90};
-
-
+    // const double dea_param[4] = {1.55, 0.25, 0.85, 9.81};
+    // const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.85, 0, 90};
     
     // for(int i = 0; i < 4; i++){
     //     dea_k[0 + i*6] = dea_k1[i];
@@ -197,7 +198,7 @@ int main(int argc, char **argv){
             }
         }
 
-        if(gotime){
+        /*if(gotime){
             ROS_INFO_STREAM("Running DEA...");
             applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
             attitude.header.stamp = ros::Time::now();
@@ -210,7 +211,7 @@ int main(int argc, char **argv){
             attitude.header.stamp = ros::Time::now();
             attitude_setpoint_pub.publish(attitude); 
             applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
-        }
+        }*/
         
         // if(ros::Time::now() - node_start_time >ros::Duration(10.0)){
         //     dea_enabled = true;
@@ -238,7 +239,7 @@ void stateCb(const mavros_msgs::State::ConstPtr& msg){
     current_state = *msg;
 }
 
-void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg){
+void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* attitude_setpoint_pub){
     /* Match links on the first call*/
     if(!gazebo_link_name_matched){
         ROS_INFO("[gazeboCb] Matching Gazebo Links");
@@ -338,6 +339,21 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg){
     state18.state18[16] = pend1_omega.y;
     state18.state18[17] = pend1_omega.z;   
     state18.header.stamp = ros::Time::now();
+
+    //publisher
+    if(gotime){
+        ROS_INFO_STREAM("Running DEA...");
+        applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
+        attitude.header.stamp = ros::Time::now();
+        attitude_setpoint_pub->publish(attitude_dea); 
+    }
+    else{
+        ROS_INFO_STREAM("Running Quad...");
+        applyQuadController(Kv6, setpoint); 
+        attitude.header.stamp = ros::Time::now();
+        attitude_setpoint_pub->publish(attitude); 
+        applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
+    }
 
     //else ROS_INFO_STREAM('Time step too small, skipping...');
 }
