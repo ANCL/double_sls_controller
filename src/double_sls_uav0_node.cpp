@@ -86,7 +86,7 @@ void pubDebugData(
 }
 
 double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
-double setpoint[6] = {0, -1.0, -0.8, 0, 0, 0};
+double setpoint[6] = {0, -1.0, -1.25, 0, 0, 0};
 const double dea_param[4] = {1.55, 0.25, 0.85, 9.81};
 const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.541, 0, 116};
 
@@ -139,7 +139,7 @@ int main(int argc, char **argv){
     // }
 
     dea_xi4.dea_xi4[0] = -9.81;
-    dea_xi4.dea_xi4[1] = -9.81*0.95;
+    dea_xi4.dea_xi4[1] = -6.93;
     dea_xi4.dea_xi4[2] = 0;
     dea_xi4.dea_xi4[3] = 0;
 
