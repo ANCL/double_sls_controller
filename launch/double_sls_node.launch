@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="double_sls_controller" name="double_sls" type="double_sls_node"/>
+</launch>
