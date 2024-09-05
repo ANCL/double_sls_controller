@@ -81,5 +81,5 @@ cd
 ### 4. Launch Double SLS Contoller
 ```
 # in a new terminal
-roslaunch double_sls_controller double_sls_controller.launch
+rosrun double_sls_controller double_sls_node
 ```

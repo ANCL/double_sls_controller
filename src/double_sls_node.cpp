@@ -505,7 +505,7 @@ void applyDEAController(
         ROS_INFO_STREAM("xi_dot-" << i << ":" << xi_dot[i]);
     }
 
-    /* Infill DEA Force Msg */
+    /* Infill DEA Force Msg --> not done for F2 */
     dea_force.header.stamp = ros::Time::now();
     dea_force.vector.x = F1[0];
     dea_force.vector.y = F1[1];
