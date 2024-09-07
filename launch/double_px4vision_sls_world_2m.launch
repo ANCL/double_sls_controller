@@ -28,7 +28,7 @@
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn_sdf.launch" >
             <arg name="x" value="0"/>
-            <arg name="y" value="0.85"/>
+            <arg name="y" value="2.0"/>
             <arg name="z" value="0"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
@@ -58,7 +58,7 @@
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn_sdf.launch" >
             <arg name="x" value="0"/>
-            <arg name="y" value="-0.85"/>
+            <arg name="y" value="-2.0"/>
             <arg name="z" value="0"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
@@ -81,10 +81,10 @@
         <rosparam command="load" file="$(find double_sls_controller)/cfg/double_sls_controller_params.yaml" />
     </group>
     <!-- Spawn Double Slung Load Model-->
-    <param name="double_slung_load" textfile="$(find double_sls_controller)/models/double_slung_load_point_mass/double_slung_load_point_mass.sdf" />
+    <param name="double_slung_load" textfile="$(find double_sls_controller)/models/double_slung_load_point_mass_2m/double_slung_load_point_mass_2m.sdf" />
     <node pkg="gazebo_ros" type="spawn_model" name="model" args="-sdf -model slung_load -param double_slung_load" />
     <!-- Connect quadrotor and the models -->
-    <!-- <node pkg="gazebo_ros_link_attacher" name="attacher" type="attach_sls.py" output="screen" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@'" />  -->
+    <node pkg="gazebo_ros_link_attacher" name="attacher" type="attach_sls.py" output="screen" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@'" /> 
     <!-- Parameter Server -->
     <rosparam command="load" file="$(find double_sls_controller)/cfg/double_sls_controller_params.yaml" />
 

@@ -7,28 +7,28 @@
     <include>
       <uri>model://ball_hinge</uri>
       <name>ball_hinge_0</name>
-      <pose>0 0.85 0 -1.57 0 0</pose>
+      <pose>0 2.0 0 -1.57 0 0</pose>
       <!-- <pose>0 2.5 0 -1.57 0 0</pose> -->
     </include>
 
     <include>
       <uri>model://ball_hinge</uri>
       <name>ball_hinge_1</name>
-      <pose>0 -0.85 0 1.57 0 0</pose>
+      <pose>0 -2.0 0 1.57 0 0</pose>
       <!-- <pose>0 -2.5 0 1.57 0 0</pose> -->
     </include>
 
     <include>
-      <uri>model://pendulum</uri>
+      <uri>model://pendulum_2m</uri>
       <name>pendulum_0</name>
-      <pose>0 0.425 0 -1.57 0 0</pose>
+      <pose>0 1.0 0 -1.57 0 0</pose>
       <!-- <pose>0 1.25 0 -1.57 0 0</pose> -->
     </include>
 
     <include>
-      <uri>model://pendulum</uri>
+      <uri>model://pendulum_2m</uri>
       <name>pendulum_1</name>
-      <pose>0 -0.425 0 1.57 0 0</pose>
+      <pose>0 -1.0 0 1.57 0 0</pose>
       <!-- <pose>0 -1.25 0 1.57 0 0</pose> -->
     </include>
 
@@ -65,12 +65,12 @@
     </joint>
 
     <joint name="ball_hinge_0_joint" type="universal">
-      <pose>0 0 0.425 0 0 0</pose>
+      <pose>0 0 1.0 0 0 0</pose>
       <!-- <pose>0 0 1.25 0 0 0</pose> -->
       <child>pendulum_0::base_link</child>
       <parent>ball_hinge_0::base_link</parent>
       <axis>
-        <xyz>1 1 1</xyz>
+        <xyz>1 1 0</xyz>
         <dynamics>
           <friction>10</friction>
         </dynamics>
@@ -78,12 +78,12 @@
     </joint>
 
     <joint name="ball_hinge_1_joint" type="universal">
-      <pose>0 0 0.425 0 0 0</pose>
+      <pose>0 0 1.0 0 0 0</pose>
       <!-- <pose>0 0 1.25 0 0 0</pose> -->
       <child>pendulum_1::base_link</child>
       <parent>ball_hinge_1::base_link</parent>
       <axis>
-        <xyz>1 1 1</xyz>
+        <xyz>1 1 0</xyz>
         <dynamics>
           <friction>10</friction>
         </dynamics>
