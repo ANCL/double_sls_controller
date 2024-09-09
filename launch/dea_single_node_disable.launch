@@ -1,0 +1,3 @@
+<launch>
+    <rosparam command="load" file="$(find double_sls_controller)/cfg/double_sls_controller_params.yaml" />
+</launch>
