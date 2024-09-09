@@ -625,12 +625,14 @@ void applyDEAController(
     bool reset_flag = false;
     diff_time = (ros::Time::now().toSec() - controller_last_called);
     controller_last_called = ros::Time::now().toSec(); //works well, gives 0.02
-    for(int j = 0; j < 4; j ++){
-        dea_xi4.header.stamp = ros::Time::now();
-        dea_xi4.dea_xi4[j] += xi_dot[j]*diff_time; // Euler, should be replaced with RK4
-        if(std::isnan(dea_xi4.dea_xi4[j])){
-            reset_flag = true;
-            break;
+    if(gotime){
+        for(int j = 0; j < 4; j ++){
+            dea_xi4.header.stamp = ros::Time::now();
+            dea_xi4.dea_xi4[j] += xi_dot[j]*diff_time; // Euler, should be replaced with RK4
+            if(std::isnan(dea_xi4.dea_xi4[j])){
+                reset_flag = true;
+                break;
+            } 
         } 
     }
 

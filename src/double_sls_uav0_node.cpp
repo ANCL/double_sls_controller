@@ -591,8 +591,8 @@ void applyDEAController(
     DEAController(state22, dea_k, dea_param, dea_ref, ros::Time::now().toSec(), F1, F2, xi_dot, sys_output);
     for(int i = 0; i<4; i++){
         dea_xi4.dea_xi_dot4[i] = xi_dot[i];
-    }
-
+    }    
+    
     if(force_saturation_enabled){
         double max_force_x_1 = 2.5;
         double max_force_y_1 = 2.5;
@@ -633,13 +633,15 @@ void applyDEAController(
     bool reset_flag = false;
     diff_time = (ros::Time::now().toSec() - controller_last_called);
     controller_last_called = ros::Time::now().toSec(); //works well, gives 0.02
-    for(int j = 0; j < 4; j ++){
-        dea_xi4.header.stamp = ros::Time::now();
-        dea_xi4.dea_xi4[j] += xi_dot[j]*diff_time; // Euler, should be replaced with RK4
-        if(std::isnan(dea_xi4.dea_xi4[j])){
-            reset_flag = true;
-            break;
-        } 
+    if(gotime){
+        for(int j = 0; j < 4; j ++){
+            dea_xi4.header.stamp = ros::Time::now();
+            dea_xi4.dea_xi4[j] += xi_dot[j]*diff_time; // Euler, should be replaced with RK4
+            if(std::isnan(dea_xi4.dea_xi4[j])){
+                reset_flag = true;
+                break;
+            } 
+        }
     }
 
     if(reset_flag == true){
