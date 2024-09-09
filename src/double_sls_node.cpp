@@ -206,7 +206,7 @@ int main(int argc, char **argv){
         }
 
         if( current_state_0.mode != "OFFBOARD" && current_state_1.mode != "OFFBOARD" &&
-            (ros::Time::now() - last_request > ros::Duration(5.0))){
+            (ros::Time::now() - last_request > ros::Duration(3.0))){
             if( set_mode_client_0.call(offb_set_mode_0) &&
                 offb_set_mode_0.response.mode_sent){
                 ROS_INFO("Offboard enabled");
@@ -237,6 +237,11 @@ int main(int argc, char **argv){
                 last_request = ros::Time::now();
             }
         }
+
+        ROS_INFO_STREAM("uav1_pose.pose.ori.w:" << uav1_pose.pose.orientation.w);    
+        ROS_INFO_STREAM("uav1_pose.pose.ori.x:" << uav1_pose.pose.orientation.x);
+        ROS_INFO_STREAM("uav1_pose.pose.ori.y:" << uav1_pose.pose.orientation.y);
+        ROS_INFO_STREAM("uav1_pose.pose.ori.z:" << uav1_pose.pose.orientation.z);  
 
 
         /*if(gotime){
@@ -318,7 +323,7 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* atti
     load_pose.pose = msg -> pose[load_link_index];
     load_twist.twist = msg -> twist[load_link_index];
 
-    // coordinate transform
+    // coordinate transformation
     uav0_pose.pose.position.y = -uav0_pose.pose.position.y; 
     uav0_pose.pose.position.z = -uav0_pose.pose.position.z; 
 
@@ -339,15 +344,21 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* atti
 
     
     // q1
-    pend0_q.x = (load_pose.pose.position.x - uav0_pose.pose.position.x) / L;
-    pend0_q.y = (load_pose.pose.position.y - uav0_pose.pose.position.y) / L;
-    pend0_q.z = (load_pose.pose.position.z - uav0_pose.pose.position.z) / L;
+    pend0_q.x = (load_pose.pose.position.x - uav0_pose.pose.position.x);
+    pend0_q.y = (load_pose.pose.position.y - uav0_pose.pose.position.y);
+    pend0_q.z = (load_pose.pose.position.z - uav0_pose.pose.position.z);
+    double q0_norm = sqrt(pend0_q.x*pend0_q.x + pend0_q.y*pend0_q.y + pend0_q.z*pend0_q.z);
+    pend0_q.x = pend0_q.x / q0_norm;
+    pend0_q.y = pend0_q.y / q0_norm;
+    pend0_q.z = pend0_q.z / q0_norm;
     // q2
-    pend1_q.x = (load_pose.pose.position.x - uav1_pose.pose.position.x) / L;
-    pend1_q.y = (load_pose.pose.position.y - uav1_pose.pose.position.y) / L;
-    pend1_q.z = (load_pose.pose.position.z - uav1_pose.pose.position.z) / L;
-
-    
+    pend1_q.x = (load_pose.pose.position.x - uav1_pose.pose.position.x);
+    pend1_q.y = (load_pose.pose.position.y - uav1_pose.pose.position.y);
+    pend1_q.z = (load_pose.pose.position.z - uav1_pose.pose.position.z);
+    double q1_norm = sqrt(pend1_q.x*pend1_q.x + pend1_q.y*pend1_q.y + pend1_q.z*pend1_q.z);
+    pend1_q.x = pend1_q.x / q1_norm;
+    pend1_q.y = pend1_q.y / q1_norm;
+    pend1_q.z = pend1_q.z / q1_norm;
 
     if(diff_time > MIN_DELTA_TIME){    
         // omega
@@ -387,14 +398,14 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* atti
 
     //publisher
     if(gotime){
-        ROS_INFO_STREAM("Running DEA...");
+        // ROS_INFO_STREAM("Running DEA...");
         applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
         attitude.header.stamp = ros::Time::now();
         attitude_setpoint_pub_0->publish(attitude_dea_0); 
         attitude_setpoint_pub_1->publish(attitude_dea_1); 
     }
     else{
-        ROS_INFO_STREAM("Running Quad...");
+        // ROS_INFO_STREAM("Running Quad...");
         applyQuadController(Kv6, setpoint_0); 
         applyQuadController_1(Kv6, setpoint_1); 
         attitude.header.stamp = ros::Time::now();
@@ -405,7 +416,7 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* atti
     //else ROS_INFO_STREAM('Time step too small, skipping...');
 }
 
-void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude){
+void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude, double vehicle){
     //temp
     double attctrl_tau_ = 0.3;
     double thrust_norm_hover = 0.538;
@@ -428,10 +439,30 @@ void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget
     Eigen::Vector4d curr_att;
     Eigen::Vector4d ref_att;
 
-    curr_att(0) = uav0_pose.pose.orientation.w; //ROS_INFO_STREAM("uav0_pose.pose.ori.w:" << uav0_pose.pose.orientation.w);
-    curr_att(1) = uav0_pose.pose.orientation.x; //ROS_INFO_STREAM("uav0_pose.pose.ori.x:" << uav0_pose.pose.orientation.x);
-    curr_att(2) = uav0_pose.pose.orientation.y; //ROS_INFO_STREAM("uav0_pose.pose.ori.y:" << uav0_pose.pose.orientation.y);
-    curr_att(3) = uav0_pose.pose.orientation.z; //ROS_INFO_STREAM("uav0_pose.pose.ori.z:" << uav0_pose.pose.orientation.z);
+    if(vehicle == 0){
+        curr_att(0) = uav0_pose.pose.orientation.w; 
+        curr_att(1) = uav0_pose.pose.orientation.x; 
+        curr_att(2) = uav0_pose.pose.orientation.y; 
+        curr_att(3) = uav0_pose.pose.orientation.z; 
+        ROS_INFO_STREAM("uav0_pose.pose.ori.w:" << uav0_pose.pose.orientation.w);    
+        ROS_INFO_STREAM("uav0_pose.pose.ori.x:" << uav0_pose.pose.orientation.x);
+        ROS_INFO_STREAM("uav0_pose.pose.ori.y:" << uav0_pose.pose.orientation.y);
+        ROS_INFO_STREAM("uav0_pose.pose.ori.z:" << uav0_pose.pose.orientation.z);  
+    }
+    else if(vehicle == 1){
+        curr_att(0) = uav1_pose.pose.orientation.w; 
+        curr_att(1) = uav1_pose.pose.orientation.x; 
+        curr_att(2) = uav1_pose.pose.orientation.y; 
+        curr_att(3) = uav1_pose.pose.orientation.z; 
+        ROS_INFO_STREAM("uav1_pose.pose.ori.w:" << uav1_pose.pose.orientation.w);    
+        ROS_INFO_STREAM("uav1_pose.pose.ori.x:" << uav1_pose.pose.orientation.x);
+        ROS_INFO_STREAM("uav1_pose.pose.ori.y:" << uav1_pose.pose.orientation.y);
+        ROS_INFO_STREAM("uav1_pose.pose.ori.z:" << uav1_pose.pose.orientation.z);                  
+    }
+    else{
+        ROS_INFO_STREAM("Argument Error!");
+    }
+
     ref_att(0) = attitude_target_q.getW();
     ref_att(1) = attitude_target_q.getX();
     ref_att(2) = attitude_target_q.getY();
@@ -451,7 +482,7 @@ void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget
 
 
     attitude.thrust = std::max(0.0, std::min(1.0, (thrust - thrust_0) / thrust_coeff + thrust_norm_hover));
-    attitude.type_mask = 1|2|4;
+    attitude.type_mask = 128;
 }
 
 geometry_msgs::Vector3 crossProduct(const geometry_msgs::Vector3 v1, geometry_msgs::Vector3 v2) {
@@ -501,7 +532,7 @@ void applyDEAController(
     double xi_dot[4];
     double sys_output[24];
     DEAController(state22, dea_k, dea_param, dea_ref, ros::Time::now().toSec(), F1, F2, xi_dot, sys_output);
-    for(int i = 0; i<4; i++){
+    for(int i = 0; i < 4; i ++){
         ROS_INFO_STREAM("xi_dot-" << i << ":" << xi_dot[i]);
     }
 
@@ -511,8 +542,8 @@ void applyDEAController(
     dea_force.vector.y = F1[1];
     dea_force.vector.z = F1[2];
 
-    force_rate_convert(F1, attitude_dea_0);
-    force_rate_convert(F2, attitude_dea_1);
+    force_rate_convert(F1, attitude_dea_0, 0);
+    force_rate_convert(F2, attitude_dea_1, 1);
 
     /* Controller State Integration */
     double diff_time;
