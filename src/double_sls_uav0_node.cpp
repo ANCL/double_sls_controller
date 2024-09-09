@@ -95,7 +95,7 @@ double setpoint[6] = {0.0, -0.8010, -1.6010, 0, 0, 0};
 // double setpoint[6] = {0.0, -1.4142, -2.4142, 0, 0, 0};
 const double dea_param[4] = {0.25, 1.55,  L, 9.81};
 // const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1.0, 0, 90};
-const double dea_ref[13] = {4, 1, 0, 0, 4, 1, 0, PI/2, 0, 0, -1.0, 0, 90};
+const double dea_ref[13] = {5, 1, 0, 0, 5, 1, -5, PI/2, 0, 0, -1.0, 0, 90};
 
 
 int main(int argc, char **argv){
