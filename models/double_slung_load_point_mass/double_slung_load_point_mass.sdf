@@ -45,7 +45,7 @@
       <child>load::base_link</child>
       <parent>pendulum_0::base_link</parent>
       <axis>
-        <xyz>1 1 1</xyz>
+        <xyz>0 0 0</xyz>
         <dynamics>
           <friction>10</friction>
         </dynamics>
@@ -57,7 +57,7 @@
       <child>load::base_link</child>
       <parent>pendulum_1::base_link</parent>
       <axis>
-        <xyz>1 1 1</xyz>
+        <xyz>0 0 0</xyz>
         <dynamics>
           <friction>10</friction>
         </dynamics>
@@ -70,9 +70,9 @@
       <child>pendulum_0::base_link</child>
       <parent>ball_hinge_0::base_link</parent>
       <axis>
-        <xyz>1 1 0</xyz>
+        <xyz>0 1 0</xyz>
         <dynamics>
-          <friction>10</friction>
+          <friction>100</friction>
         </dynamics>
       </axis>
     </joint>
@@ -83,9 +83,9 @@
       <child>pendulum_1::base_link</child>
       <parent>ball_hinge_1::base_link</parent>
       <axis>
-        <xyz>1 1 0</xyz>
+        <xyz>0 1 0</xyz>
         <dynamics>
-          <friction>10</friction>
+          <friction>100</friction>
         </dynamics>
       </axis>
     </joint>
