@@ -383,6 +383,9 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* atti
     pend0_omega = crossProduct(pend0_q, pend0_q_dot);
     pend1_omega = crossProduct(pend1_q, pend1_q_dot);
 
+    ROS_INFO_STREAM("innerProduct(q1, omega1):" << pend0_q.x*pend0_omega.x + pend0_q.y*pend0_omega.y + pend0_q.z*pend0_omega.z);
+    ROS_INFO_STREAM("innerProduct(q2, omega2):" << pend1_q.x*pend1_omega.x + pend1_q.y*pend1_omega.y + pend1_q.z*pend1_omega.z);
+
     // ROS_INFO_STREAM("diff:");
     // ROS_INFO_STREAM("pend0_omega.x:" << pend0_omega.x);
     // ROS_INFO_STREAM("pend0_omega.y:" << pend0_omega.y);
