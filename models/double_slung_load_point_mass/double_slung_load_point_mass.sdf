@@ -40,54 +40,42 @@
 
 
 
-    <joint name="load_0_joint" type="universal">
+    <joint name="load_0_joint" type="ball">
       <pose>0 0 0 0 0 0</pose>
       <child>load::base_link</child>
       <parent>pendulum_0::base_link</parent>
-      <axis>
-        <xyz>1 1 1</xyz>
-        <dynamics>
-          <friction>10</friction>
-        </dynamics>
-      </axis>
     </joint>
 
-    <joint name="load_1_joint" type="universal">
+    <joint name="load_1_joint" type="ball">
       <pose>0 0 0 0 0 0</pose>
       <child>load::base_link</child>
       <parent>pendulum_1::base_link</parent>
-      <axis>
-        <xyz>1 1 1</xyz>
-        <dynamics>
-          <friction>10</friction>
-        </dynamics>
-      </axis>
     </joint>
 
-    <joint name="ball_hinge_0_joint" type="universal">
+    <joint name="ball_hinge_0_joint" type="ball">
       <pose>0 0 0.425 0 0 0</pose>
       <!-- <pose>0 0 1.25 0 0 0</pose> -->
       <child>pendulum_0::base_link</child>
       <parent>ball_hinge_0::base_link</parent>
-      <axis>
-        <xyz>1 1 0</xyz>
+      <!-- <axis>
+        <xyz>0 1 0</xyz>
         <dynamics>
-          <friction>10</friction>
+          <friction>1000</friction>
         </dynamics>
-      </axis>
+      </axis> -->
     </joint>
 
-    <joint name="ball_hinge_1_joint" type="universal">
+    <joint name="ball_hinge_1_joint" type="ball">
       <pose>0 0 0.425 0 0 0</pose>
       <!-- <pose>0 0 1.25 0 0 0</pose> -->
       <child>pendulum_1::base_link</child>
       <parent>ball_hinge_1::base_link</parent>
-      <axis>
-        <xyz>1 1 0</xyz>
+      <!-- <axis>
+        <xyz>0 1 0</xyz>
         <dynamics>
-          <friction>10</friction>
+          <friction>1000</friction>
         </dynamics>
-      </axis>
+      </axis> -->
     </joint>
 
     <!-- <include>

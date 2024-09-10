@@ -38,7 +38,7 @@ double controller_last_called;
 void stateCb_0(const mavros_msgs::State::ConstPtr& msg);
 void stateCb_1(const mavros_msgs::State::ConstPtr& msg);
 void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* attitude_setpoint_pub_0, ros::Publisher* attitude_setpoint_pub_1);
-void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude);
+void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude, int uav);
 void applyQuadController(double Kv6[6], double setpoint[6]);
 void applyQuadController_1(double Kv6[6], double setpoint[6]);
 void applyDEAController(double_sls_controller::DSlsState state18, double_sls_controller::DEAState &dea_xi4, const double dea_k[24], const double dea_param[4], const double ref[13]);
@@ -405,9 +405,9 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* atti
     //else ROS_INFO_STREAM('Time step too small, skipping...');
 }
 
-void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude){
+void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude, int uav){
     //temp
-    double attctrl_tau_ = 0.3;
+    double attctrl_tau_ = 0.1;
     double thrust_norm_hover = 0.538;
     double thrust_coeff = 100;  
     double thrust_0 = 1.55*9.81;
@@ -420,18 +420,26 @@ void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget
     pitch = std::atan2(controller_output[0], -controller_output[2]);
     tf2::Quaternion attitude_target_q;
     attitude_target_q.setRPY(roll, pitch, yaw);
-    attitude.orientation.x = attitude_target_q.getX();
-    attitude.orientation.y = attitude_target_q.getY();
-    attitude.orientation.z = attitude_target_q.getZ();
-    attitude.orientation.w = attitude_target_q.getW();
+    // attitude.orientation.x = attitude_target_q.getX();
+    // attitude.orientation.y = attitude_target_q.getY();
+    // attitude.orientation.z = attitude_target_q.getZ();
+    // attitude.orientation.w = attitude_target_q.getW();
 
     Eigen::Vector4d curr_att;
     Eigen::Vector4d ref_att;
 
-    curr_att(0) = uav0_pose.pose.orientation.w; //ROS_INFO_STREAM("uav0_pose.pose.ori.w:" << uav0_pose.pose.orientation.w);
-    curr_att(1) = uav0_pose.pose.orientation.x; //ROS_INFO_STREAM("uav0_pose.pose.ori.x:" << uav0_pose.pose.orientation.x);
-    curr_att(2) = uav0_pose.pose.orientation.y; //ROS_INFO_STREAM("uav0_pose.pose.ori.y:" << uav0_pose.pose.orientation.y);
-    curr_att(3) = uav0_pose.pose.orientation.z; //ROS_INFO_STREAM("uav0_pose.pose.ori.z:" << uav0_pose.pose.orientation.z);
+    if (uav == 0){
+        curr_att(0) = uav0_pose.pose.orientation.w; //ROS_INFO_STREAM("uav0_pose.pose.ori.w:" << uav0_pose.pose.orientation.w);
+        curr_att(1) = uav0_pose.pose.orientation.x; //ROS_INFO_STREAM("uav0_pose.pose.ori.x:" << uav0_pose.pose.orientation.x);
+        curr_att(2) = uav0_pose.pose.orientation.y; //ROS_INFO_STREAM("uav0_pose.pose.ori.y:" << uav0_pose.pose.orientation.y);
+        curr_att(3) = uav0_pose.pose.orientation.z; //ROS_INFO_STREAM("uav0_pose.pose.ori.z:" << uav0_pose.pose.orientation.z);
+    }
+    else if (uav == 1){
+        curr_att(0) = uav1_pose.pose.orientation.w; //ROS_INFO_STREAM("uav0_pose.pose.ori.w:" << uav0_pose.pose.orientation.w);
+        curr_att(1) = uav1_pose.pose.orientation.x; //ROS_INFO_STREAM("uav0_pose.pose.ori.x:" << uav0_pose.pose.orientation.x);
+        curr_att(2) = uav1_pose.pose.orientation.y; //ROS_INFO_STREAM("uav0_pose.pose.ori.y:" << uav0_pose.pose.orientation.y);
+        curr_att(3) = uav1_pose.pose.orientation.z; //ROS_INFO_STREAM("uav0_pose.pose.ori.z:" << uav0_pose.pose.orientation.z);
+    }
     ref_att(0) = attitude_target_q.getW();
     ref_att(1) = attitude_target_q.getX();
     ref_att(2) = attitude_target_q.getY();
@@ -440,18 +448,17 @@ void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget
     const Eigen::Vector4d inverse(1.0, -1.0, -1.0, -1.0);
     const Eigen::Vector4d q_inv = inverse.asDiagonal() * curr_att;
     const Eigen::Vector4d qe = quatMultiplication(q_inv, ref_att); // ROS_INFO_STREAM("qe:" << qe);
-    Eigen::Vector3d desired_rate_{Eigen::Vector3d::Zero()};
-    desired_rate_(0) = (2.0 / attctrl_tau_) * std::copysign(1.0, qe(0)) * qe(1);
-    desired_rate_(1) = (2.0 / attctrl_tau_) * std::copysign(1.0, qe(0)) * qe(2);
-    desired_rate_(2) = (2.0 / attctrl_tau_) * std::copysign(1.0, qe(0)) * qe(3);   
+    attitude.body_rate.x = (2.0 / attctrl_tau_) * std::copysign(1.0, qe(0)) * qe(1);
+    attitude.body_rate.y = (2.0 / attctrl_tau_) * std::copysign(1.0, qe(0)) * qe(2);
+    attitude.body_rate.z = (2.0 / attctrl_tau_) * std::copysign(1.0, qe(0)) * qe(3);   
 
-    attitude.body_rate.x = desired_rate_(0); // ROS_INFO_STREAM("body_rate_x:" << attitude.body_rate.x << " desired_rate_(0):" << desired_rate_(0));
-    attitude.body_rate.y = desired_rate_(1); // ROS_INFO_STREAM("body_rate_y:" << attitude.body_rate.y << " desired_rate_(1):" << desired_rate_(1));
-    attitude.body_rate.z = desired_rate_(2); // ROS_INFO_STREAM("body_rate_z:" << attitude.body_rate.z << " desired_rate_(2):" << desired_rate_(2));
+    // ROS_INFO_STREAM("body_rate_x:" << attitude.body_rate.x << " desired_rate_(0):" << desired_rate_(0));
+    // ROS_INFO_STREAM("body_rate_y:" << attitude.body_rate.y << " desired_rate_(1):" << desired_rate_(1));
+    // ROS_INFO_STREAM("body_rate_z:" << attitude.body_rate.z << " desired_rate_(2):" << desired_rate_(2));
 
 
     attitude.thrust = std::max(0.0, std::min(1.0, (thrust - thrust_0) / thrust_coeff + thrust_norm_hover));
-    attitude.type_mask = 1|2|4;
+    attitude.type_mask = 128;
 }
 
 geometry_msgs::Vector3 crossProduct(const geometry_msgs::Vector3 v1, geometry_msgs::Vector3 v2) {
@@ -468,7 +475,7 @@ void applyQuadController(double Kv6[6], double setpoint[6]){
     controller_output[0] = (-Kv6[0] * (uav0_pose.pose.position.x - setpoint[0]) - Kv6[3] * (uav0_twist.twist.linear.x - setpoint[3]))*M_QUAD;
     controller_output[1] = (-Kv6[1] * (uav0_pose.pose.position.y - setpoint[1]) - Kv6[4] * (uav0_twist.twist.linear.y - setpoint[4]))*M_QUAD;
     controller_output[2] = (-Kv6[2] * (uav0_pose.pose.position.z - setpoint[2]) - Kv6[5] * (uav0_twist.twist.linear.z - setpoint[5]) - 9.81)*M_QUAD;
-    force_rate_convert(controller_output, attitude);
+    force_rate_convert(controller_output, attitude, 0);
 }
 
 void applyQuadController_1(double Kv6[6], double setpoint[6]){
@@ -477,7 +484,7 @@ void applyQuadController_1(double Kv6[6], double setpoint[6]){
     controller_output[0] = (-Kv6[0] * (uav1_pose.pose.position.x - setpoint[0]) - Kv6[3] * (uav1_twist.twist.linear.x - setpoint[3]))*M_QUAD;
     controller_output[1] = (-Kv6[1] * (uav1_pose.pose.position.y - setpoint[1]) - Kv6[4] * (uav1_twist.twist.linear.y - setpoint[4]))*M_QUAD;
     controller_output[2] = (-Kv6[2] * (uav1_pose.pose.position.z - setpoint[2]) - Kv6[5] * (uav1_twist.twist.linear.z - setpoint[5]) - 9.81)*M_QUAD;
-    force_rate_convert(controller_output, attitude_1);
+    force_rate_convert(controller_output, attitude_1, 1);
 }
 
 void applyDEAController(
@@ -511,8 +518,8 @@ void applyDEAController(
     dea_force.vector.y = F1[1];
     dea_force.vector.z = F1[2];
 
-    force_rate_convert(F1, attitude_dea_0);
-    force_rate_convert(F2, attitude_dea_1);
+    force_rate_convert(F1, attitude_dea_0, 0);
+    force_rate_convert(F2, attitude_dea_1, 1);
 
     /* Controller State Integration */
     double diff_time;
