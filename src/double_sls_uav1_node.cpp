@@ -43,7 +43,7 @@ geometry_msgs::Vector3 crossProduct(const geometry_msgs::Vector3 v1, geometry_ms
 bool gazebo_link_name_matched = false;
 bool dea_enabled;
 bool param_tuning_enabled = false;
-bool force_saturation_enabled = false;
+bool force_saturation_enabled = true;
 int uav0_link_index;
 int uav1_link_index;
 int pend0_link_index;
@@ -91,11 +91,11 @@ void pubDebugData(
 }
 
 double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
-double setpoint[6] = {0.0, 0.8010, -1.6010, 0, 0, 0};
-// double setpoint[6] = {0.0, 1.4142, -2.4142, 0, 0, 0};
+double setpoint[6] = {0.0, 0.8010, -5.6010, 0, 0, 0};
 const double dea_param[4] = {0.25, 1.55,  L, 9.81};
 // const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1.0, 0, 90};
-const double dea_ref[13] = {5, 1, 0, 0, 5, 1, -5, PI/2, 0, 0, -1.0, 0, 90};
+const double dea_ref[13] = {5, 0.5, 0, 0, 5, 0.5, 0, PI/2, 0, 0, -5.0, 0, 90};
+
 
 int main(int argc, char **argv){
 
@@ -118,14 +118,6 @@ int main(int argc, char **argv){
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(50.0);
 
-    // dynamic_reconfigure::Server<double_sls_controller::configConfig> server;
-    // dynamic_reconfigure::Server<double_sls_controller::configConfig>::CallbackType f;
-    
-    // f = boost::bind(&callback, _1, _2);
-    // server.setCallback(f);
-
-    // double Kv6[6] = {4.3166, 4.3166, 4.316, 3.1037, 3.1037, 3.1037};
-    // double setpoint[6] = {0, 1.0, -1.0, 0, 0, 0};
     // Pole Assignment Gains
     const double dea_k1[4] = {0.4025,    2.1325,    4.0800,   3.3500};
     const double dea_k2[4] = {0.4025,    2.1325,    4.0800,   3.3500};
@@ -140,10 +132,6 @@ int main(int argc, char **argv){
     // const double dea_k4[4] = {0.3162,    0.8558,         0,         0};
     // const double dea_k5[4] = {0.3162,    0.8558,         0,         0};
     // const double dea_k6[4] = {0.3162,    0.8558,         0,         0};
-
-    //not global variables
-    // const double dea_param[4] = {1.55, 0.25, 0.85, 9.81};
-    // const double dea_ref[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.85, 0, 90};
 
     if(!param_tuning_enabled){
         for(int i = 0; i < 4; i++){
@@ -192,7 +180,6 @@ int main(int argc, char **argv){
         nh.getParam("/double_sls_controller/dea_enabled", dea_enabled);
         nh.getParam("bool", gotime);
         
-        
         // if(param_tuning_enabled){
         //     std::vector<double> dea_k_vec;
         //     nh.getParam("dea_k24", dea_k_vec);
@@ -219,27 +206,6 @@ int main(int argc, char **argv){
                 last_request = ros::Time::now();
             }
         }
-
-        /*if(gotime){
-            ROS_INFO_STREAM("Running DEA...");
-            applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
-            attitude.header.stamp = ros::Time::now();
-            attitude_setpoint_pub.publish(attitude_dea); 
-        }
-        else{
-            //ROS_INFO_STREAM("Running Quad...");
-            ROS_INFO_STREAM(dea_k[0]);
-            applyQuadController(Kv6, setpoint); 
-            attitude.header.stamp = ros::Time::now();
-            attitude_setpoint_pub.publish(attitude); 
-            applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
-        }*/
-        
-        // if(ros::Time::now() - node_start_time >ros::Duration(10.0)){
-        //     dea_enabled = true;
-        // }
-        
-        
 
         /* Publish System Data for Debugging */
         pubDebugData(
@@ -287,7 +253,6 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* atti
     diff_time = (ros::Time::now().toSec() - gazebo_last_called); // gives nan or inf sometimes
     // ROS_INFO_STREAM("diff_time:" << diff_time);
     gazebo_last_called = ros::Time::now().toSec();
-
     
     uav0_pose.pose = msg -> pose[uav0_link_index];
     uav0_twist.twist = msg -> twist[uav0_link_index];
@@ -349,7 +314,6 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* atti
     pend0_q.x = pend0_q.x / q1_norm;
     pend0_q.y = pend0_q.y / q1_norm;
     pend0_q.z = pend0_q.z / q1_norm;
-    ROS_INFO_STREAM("q1norm:"<< sqrt(pend0_q.x*pend0_q.x + pend0_q.y*pend0_q.y + pend0_q.z*pend0_q.z));
 
     // q2
     pend1_q.x = (load_pose.pose.position.x - uav1_pose.pose.position.x);
@@ -359,11 +323,6 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* atti
     pend1_q.x = pend1_q.x / q2_norm;
     pend1_q.y = pend1_q.y / q2_norm;
     pend1_q.z = pend1_q.z / q2_norm;
-    ROS_INFO_STREAM("q2norm:"<< sqrt(pend0_q.x*pend0_q.x + pend0_q.y*pend0_q.y + pend0_q.z*pend0_q.z));
-
-    
-    // double q2_norm;
-    // q2_norm = pend1_q.x^2 + pend1_q.y^2 + pend1_q.z^2; ROS_INFO_STREAM("q2_norm:" q2_norm);
 
     if(diff_time >= MIN_DELTA_TIME){    
         // omega
@@ -389,14 +348,13 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* atti
     // ROS_INFO_STREAM("pend1_omega.y:" << pend1_omega.y);
     // ROS_INFO_STREAM("pend1_omega.z:" << pend1_omega.z);
   
-
     // Directly Use Gazebo omegas:
-    // pend0_omega.x = (msg -> twist[pend0_link_index]).angular.x;
-    // pend0_omega.y = -(msg -> twist[pend0_link_index]).angular.y;
-    // pend0_omega.z = -(msg -> twist[pend0_link_index]).angular.z;
-    // pend1_omega.x = (msg -> twist[pend1_link_index]).angular.x;
-    // pend1_omega.y = -(msg -> twist[pend1_link_index]).angular.y;
-    // pend1_omega.z = -(msg -> twist[pend1_link_index]).angular.z;
+    pend0_omega.x = (msg -> twist[pend0_link_index]).angular.x;
+    pend0_omega.y = -(msg -> twist[pend0_link_index]).angular.y;
+    pend0_omega.z = -(msg -> twist[pend0_link_index]).angular.z;
+    pend1_omega.x = (msg -> twist[pend1_link_index]).angular.x;
+    pend1_omega.y = -(msg -> twist[pend1_link_index]).angular.y;
+    pend1_omega.z = -(msg -> twist[pend1_link_index]).angular.z;
 
     // ROS_INFO_STREAM("gazebo:");
     // ROS_INFO_STREAM("pend0_omega.x:" << pend0_omega.x);
@@ -429,20 +387,17 @@ void gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg, ros::Publisher* atti
 
     //publisher
     if(gotime){
-        ROS_INFO_STREAM("Running DEA...");
         applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
         attitude.header.stamp = ros::Time::now();
         attitude_setpoint_pub->publish(attitude_dea); 
     }
     else{
-        ROS_INFO_STREAM("Running Quad...");
         applyQuadController(Kv6, setpoint); 
         attitude.header.stamp = ros::Time::now();
         attitude_setpoint_pub->publish(attitude); 
         applyDEAController(state18, dea_xi4, dea_k, dea_param, dea_ref);
     }
 
-    //else ROS_INFO_STREAM('Time step too small, skipping...');
 }
 
 void force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude){
@@ -557,6 +512,10 @@ void applyQuadController(double Kv6[6], double setpoint[6]){
     controller_output[0] = (-Kv6[0] * (uav1_pose.pose.position.x - setpoint[0]) - Kv6[3] * (uav1_twist.twist.linear.x - setpoint[3]))*M_QUAD;
     controller_output[1] = (-Kv6[1] * (uav1_pose.pose.position.y - setpoint[1]) - Kv6[4] * (uav1_twist.twist.linear.y - setpoint[4]))*M_QUAD;
     controller_output[2] = (-Kv6[2] * (uav1_pose.pose.position.z - setpoint[2]) - Kv6[5] * (uav1_twist.twist.linear.z - setpoint[5]) - 9.81)*M_QUAD;
+
+    // ROS_INFO_STREAM("controller_output[0]" << controller_output[0]);
+    // ROS_INFO_STREAM("controller_output[1]" << controller_output[1]);
+    // ROS_INFO_STREAM("controller_output[2]" << controller_output[2]);
     force_rate_convert(controller_output, attitude);
 }
 
@@ -586,8 +545,8 @@ void applyDEAController(
     }
 
     if(force_saturation_enabled){
-        double max_force_x_1 = 2.5;
-        double max_force_y_1 = 2.5;
+        double max_force_x_1 = 0.1;
+        double max_force_y_1 = 0.1;
         double max_force_z_1 = 17;
         if(F1[0]>max_force_x_1) F1[0] = max_force_x_1;
         else if(F1[0]<-max_force_x_1) F1[0] = -max_force_x_1;
@@ -596,8 +555,8 @@ void applyDEAController(
         if(F1[2]>max_force_z_1) F1[2] = max_force_z_1;
         else if(F1[2]<-max_force_z_1) F1[2] = -max_force_z_1; 
         
-        double max_force_x_2 = 2.5;
-        double max_force_y_2 = 2.5;
+        double max_force_x_2 = 0.1;
+        double max_force_y_2 = 0.1;
         double max_force_z_2 = 17;
         if(F2[0]>max_force_x_2) F2[0] = max_force_x_2;
         else if(F2[0]<-max_force_x_2) F2[0] = -max_force_x_2;
@@ -625,7 +584,7 @@ void applyDEAController(
     bool reset_flag = false;
     diff_time = (ros::Time::now().toSec() - controller_last_called);
     controller_last_called = ros::Time::now().toSec(); //works well, gives 0.02
-    if(gotime){
+    // if(gotime){
         for(int j = 0; j < 4; j ++){
             dea_xi4.header.stamp = ros::Time::now();
             dea_xi4.dea_xi4[j] += xi_dot[j]*diff_time; // Euler, should be replaced with RK4
@@ -634,7 +593,7 @@ void applyDEAController(
                 break;
             } 
         } 
-    }
+    // }
 
     if(reset_flag == true){
         dea_xi4.dea_xi4[0] = -9.81;
