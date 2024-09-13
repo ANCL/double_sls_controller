@@ -44,24 +44,12 @@
       <pose>0 0 0 0 0 0</pose>
       <child>load::base_link</child>
       <parent>pendulum_0::base_link</parent>
-      <!-- <axis>
-        <xyz>0 0 0</xyz>
-        <dynamics>
-          <friction>10</friction>
-        </dynamics>
-      </axis> -->
     </joint>
 
     <joint name="load_1_joint" type="ball">
       <pose>0 0 0 0 0 0</pose>
       <child>load::base_link</child>
       <parent>pendulum_1::base_link</parent>
-      <!-- <axis>
-        <xyz>0 0 0</xyz>
-        <dynamics>
-          <friction>10</friction>
-        </dynamics>
-      </axis> -->
     </joint>
 
     <joint name="ball_hinge_0_joint" type="ball">
@@ -72,7 +60,7 @@
       <!-- <axis>
         <xyz>0 1 0</xyz>
         <dynamics>
-          <friction>100</friction>
+          <friction>1000</friction>
         </dynamics>
       </axis> -->
     </joint>
@@ -85,7 +73,7 @@
       <!-- <axis>
         <xyz>0 1 0</xyz>
         <dynamics>
-          <friction>100</friction>
+          <friction>1000</friction>
         </dynamics>
       </axis> -->
     </joint>
