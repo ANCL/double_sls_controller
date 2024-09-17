@@ -30,7 +30,7 @@
 #include <double_sls_controller/PendAngle.h>
 
 #include <double_sls_controller/configConfig.h>
-#include <double_sls_controller/double_sls_controller.h>
+// #include <double_sls_controller/double_sls_controller.h>
 
 #define SITL_ENABLED true
 #if SITL_ENABLED
@@ -65,3 +65,16 @@ double dea_k[24];
 void callback(double_sls_controller::configConfig &config, uint32_t level);
 
 #endif
+
+
+class doubleSlsCtrl {
+    private:
+        ros::NodeHandle nh_;
+        ros::NodeHandle nh_private;
+        double norm_thrust_const_, norm_thrust_offset_;
+        double max_fb_acc_;    
+        
+    public:
+        doubleSlsCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private);
+        virtual ~doubleSlsCtrl();
+};
