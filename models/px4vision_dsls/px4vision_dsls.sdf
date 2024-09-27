@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 <sdf version='1.6'>
-  <model name='px4vision_ancl'>
+  <model name='px4vision_dsls'>
     <link name='base_link'>
       <pose>0 0 0 0 -0 0</pose>
       <inertial>

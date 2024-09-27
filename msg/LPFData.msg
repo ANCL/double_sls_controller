@@ -1,0 +1,12 @@
+# LPF data test
+std_msgs/Header header
+geometry_msgs/Vector3 pend0_q_dot
+geometry_msgs/Vector3 pend1_q_dot
+geometry_msgs/Vector3 pend0_q_dot_lpf1
+geometry_msgs/Vector3 pend1_q_dot_lpf1
+geometry_msgs/Vector3 pend0_q_dot_lpf2
+geometry_msgs/Vector3 pend1_q_dot_lpf2
+geometry_msgs/Vector3 pend0_omega_lpf1
+geometry_msgs/Vector3 pend1_omega_lpf1
+geometry_msgs/Vector3 pend0_omega_lpf2
+geometry_msgs/Vector3 pend1_omega_lpf2

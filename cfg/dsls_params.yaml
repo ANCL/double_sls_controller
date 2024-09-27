@@ -1,0 +1,24 @@
+throttle_offset: 0.018
+Kpos_x: 3.1623
+Kvel_x: 7.5274
+Kacc_x: 7.3779
+Kjer_x: 3.9694
+
+Kpos_y: 3.1623
+Kvel_y: 7.5274
+Kacc_y: 7.3779
+Kjer_y: 3.9694
+
+Kpos_z: 24.0
+Kvel_z: 50.0
+Kacc_z: 35.0
+Kjer_z: 10.0
+
+Kq13_1: 2.0
+Kq13_2: 3.0
+
+Kq21_1: 2.0
+Kq21_2: 3.0
+
+Kq22_1: 2.0
+Kq22_2: 3.0

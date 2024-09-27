@@ -20,11 +20,13 @@
         <arg name="verbose" value="$(arg verbose)"/>
         <arg name="paused" value="$(arg paused)"/>
     </include>
+
     <!-- UAV0 -->
     <group ns="uav0">
         <!-- MAVROS and vehicle configs -->
         <arg name="ID" value="0"/>
         <arg name="fcu_url" default="udp://:14540@localhost:14580"/>
+        
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn_sdf.launch" >
             <arg name="x" value="0"/>
@@ -37,10 +39,29 @@
             <arg name="mavlink_udp_port" value="14560"/>
             <arg name="mavlink_tcp_port" value="4560"/>
             <arg name="ID" value="$(arg ID)"/>
-            <!-- <arg name="gst_udp_port" value="$(eval 5600 + arg('ID'))"/>
-            <arg name="video_uri" value="$(eval 5600 + arg('ID'))"/>
-            <arg name="mavlink_cam_udp_port" value="$(eval 14530 + arg('ID'))"/> -->
         </include>
+
+        <!-- <arg name="x" default="0"/>
+        <arg name="y" default="0.85"/>
+        <arg name="z" default="0"/>
+        <arg name="R" default="0"/>
+        <arg name="P" default="0"/>
+        <arg name="Y" default="0"/>
+        <env name="PX4_SIM_MODEL" value="$(arg vehicle)" />
+        <env name="PX4_ESTIMATOR" value="$(arg est)" />
+        <arg name="mavlink_udp_port" default="14560"/>
+        <arg name="mavlink_tcp_port" default="4560"/>
+        <arg name="interactive" default="true"/>
+        <arg name="cmd" default="xmlstarlet ed -d '//plugin[@name=&quot;mavlink_interface&quot;]/mavlink_tcp_port' -s '//plugin[@name=&quot;mavlink_interface&quot;]' -t elem -n mavlink_tcp_port -v $(arg mavlink_tcp_port) $(find double_sls_controller)/models/px4vision_dsls/px4vision_dsls.sdf"/>
+        <param command="$(arg cmd)" name="model_description"/>
+        <arg unless="$(arg interactive)" name="px4_command_arg1" value=""/>
+        <arg     if="$(arg interactive)" name="px4_command_arg1" value="-d"/>
+        <node name="sitl_$(arg ID)" pkg="px4" type="px4" output="screen" args="$(find px4)/build/px4_sitl_default/etc -s etc/init.d-posix/rcS -i $(arg ID) -w sitl_$(arg vehicle)_$(arg ID) $(arg px4_command_arg1)">
+        </node>
+        <node name="$(arg vehicle)_$(arg ID)_spawn" output="screen" pkg="gazebo_ros" type="spawn_model" args="-sdf -param model_description -model $(arg vehicle)_$(arg ID) -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"/> -->
+
+
+
         <!-- MAVROS -->
         <include file="$(find mavros)/launch/px4.launch">
             <arg name="fcu_url" value="$(arg fcu_url)"/>
@@ -50,11 +71,13 @@
         </include>
         <rosparam command="load" file="$(find double_sls_controller)/cfg/double_sls_controller_params.yaml" />
     </group>
+
     <!-- UAV1 -->
     <group ns="uav1">
         <!-- MAVROS and vehicle configs -->
         <arg name="ID" value="1"/>
         <arg name="fcu_url" default="udp://:14541@localhost:14581"/>
+
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn_sdf.launch" >
             <arg name="x" value="0"/>
@@ -67,10 +90,9 @@
             <arg name="mavlink_udp_port" value="14561"/>
             <arg name="mavlink_tcp_port" value="4561"/>
             <arg name="ID" value="$(arg ID)"/>
-            <!-- <arg name="gst_udp_port" value="$(eval 5600 + arg('ID'))"/>
-            <arg name="video_uri" value="$(eval 5600 + arg('ID'))"/>
-            <arg name="mavlink_cam_udp_port" value="$(eval 14530 + arg('ID'))"/> -->
         </include>
+        
+
         <!-- MAVROS -->
         <include file="$(find mavros)/launch/px4.launch">
             <arg name="fcu_url" value="$(arg fcu_url)"/>
