@@ -1,7 +1,6 @@
 #include <double_sls_controller/double_sls_controller.h>
 #include <double_sls_controller/common.h>
 #include <double_sls_controller/control.h>
-#include <DEAController.h>
 #include <DSLSDEAController.h>
 
 void callback(double_sls_controller::configConfig &config, uint32_t level) {
@@ -410,69 +409,6 @@ void dslsCtrl::applyQuad1Controller(double Kv6[6], double setpoint[6]){
     force_rate_convert(controller_output, attitude_1_, 1);
 }
 
-// void dslsCtrl::applyDEAController(
-//     double_sls_controller::DSlsState state18, 
-//     double_sls_controller::DEAState &dea_xi4, 
-//     const double dea_k[24], 
-//     const double dea_param[4], 
-//     const double dea_ref[13],
-//     double t
-//     ){
-
-//     /* Getting Full State */
-//     double state22[22] = {};
-//     for(int i = 0; i < 22; i++){
-//         if(i < 18) state22[i] = state18_.state18[i];
-//         else if(i < 22) state22[i] = dea_xi4.dea_xi4[i-18];
-//     }
-
-//     /* Apply Controller */
-//     double F1[3];
-//     double F2[3];
-//     double xi_dot[4];
-//     double sys_output[24];
-//     DEAController(state22, dea_k, dea_param, dea_ref, t, F1, F2, xi_dot, sys_output);
-//     dea_xi4.header.stamp = ros::Time::now();
-//     for(int i = 0; i < 4; i ++){
-//         dea_xi4.dea_xi_dot4[i] = xi_dot[i];
-//     }
-
-//     /* Infill DEA Force Msg */
-//     dea_force_0.header.stamp = ros::Time::now();
-//     dea_force_0.vector.x = F1[0];
-//     dea_force_0.vector.y = F1[1];
-//     dea_force_0.vector.z = F1[2];
-
-//     dea_force_1.header.stamp = ros::Time::now();
-//     dea_force_1.vector.x = F2[0];
-//     dea_force_1.vector.y = F2[1];
-//     dea_force_1.vector.z = F2[2];
-
-//     force_rate_convert(F1, attitude_dea_0, 0);
-//     force_rate_convert(F2, attitude_dea_1, 1);
-
-//     /* Controller State Integration */
-//     double diff_time;
-//     bool reset_controller_state = false;
-//     diff_time = (ros::Time::now().toSec() - controller_last_called);
-//     controller_last_called = ros::Time::now().toSec(); 
-//     if(dea_enabled){
-//         for(int j = 0; j < 4; j ++){
-//             dea_xi4.dea_xi4[j] += xi_dot[j]*diff_time; // Euler
-//             if(std::isnan(dea_xi4.dea_xi4[j])){
-//                 reset_controller_state = true;
-//                 break;
-//             } 
-//         }         
-//     }
- 
-//     if(reset_controller_state){
-//         for(int i = 0; i<4; i++) dea_xi4.dea_xi4[i] = dea_xi4_ic[i];
-//         ROS_INFO_STREAM("[applyDEA] xi reset detected");
-//     }      
-
-
-// }
 
 int dslsCtrl::applyDSLSDEAController(
     double_sls_controller::DSlsState state18, 

@@ -50,28 +50,10 @@
 #if SITL_ENABLED
     #include <gazebo_msgs/LinkStates.h>
     #include <gazebo_msgs/GetLinkState.h>
-    // #include <gazebo/msgs/posestamped.pb.h>
 #endif
 
 #define PI 3.1415926535
 #define MIN_DELTA_TIME 1e-16
-
-// /* SLS0 */
-// geometry_msgs::PoseStamped uav0_pose, uav0_pose_last;
-// geometry_msgs::TwistStamped uav0_twist;
-// geometry_msgs::PoseStamped pend0_pose;
-// geometry_msgs::TwistStamped pend0_twist;
-// double_sls_controller::PendAngle pend0_angle;
-
-// /* SLS1 */
-// geometry_msgs::PoseStamped uav1_pose;
-// geometry_msgs::TwistStamped uav1_twist;
-// geometry_msgs::PoseStamped pend1_pose;
-// geometry_msgs::TwistStamped pend1_twist;
-
-/* Payload */
-// geometry_msgs::PoseStamped load_pose, load_pose_last;
-// geometry_msgs::TwistStamped load_vel;
 
 #if SITL_ENABLED
     void gazeboCallback(const gazebo_msgs::LinkStates::ConstPtr& msg);
@@ -199,8 +181,6 @@ class dslsCtrl {
         double load_pose_ic_[3] = {0, 0, c_3_};
         double setpoint_0_[6] = {load_pose_ic_[0], load_pose_ic_[1] - cable_length_*sin(pend_angle_deg_ * 0.5),  load_pose_ic_[2] - cable_length_*cos(pend_angle_deg_ * 0.5), 0, 0, 0};
         double setpoint_1_[6] = {load_pose_ic_[0], load_pose_ic_[1] + cable_length_*sin(pend_angle_deg_ * 0.5),  load_pose_ic_[2] - cable_length_*cos(pend_angle_deg_ * 0.5), 0, 0, 0};
-        // double setpoint_0[6] = {load_pose_ic[0] + cable_length*sin(pend_angle_deg * 0.5), load_pose_ic[1], load_pose_ic[2] - cable_length*cos(pend_angle_deg * 0.5), 0, 0, 0};
-        // double setpoint_1[6] = {load_pose_ic[0] - cable_length*sin(pend_angle_deg * 0.5), load_pose_ic[1], load_pose_ic[2] - cable_length*cos(pend_angle_deg * 0.5), 0, 0, 0};
         double dea_xi4_ic_[4] = {-gravity_acc_, -5.10, 0, 0}; 
 
         /* Gains */
@@ -295,7 +275,6 @@ class dslsCtrl {
         void applyQuad0Controller(double Kv6[6], double setpoint[6]);
         void applyQuad1Controller(double Kv6[6], double setpoint[6]);
         int applyOpenLoopController(void);
-        void applyDEAController(double_sls_controller::DSlsState state18, double_sls_controller::DEAState &dea_xi4, const double dea_k[24], const double dea_param[4], const double ref[13], double t);
         int applyDSLSDEAController(double_sls_controller::DSlsState state18, double_sls_controller::DEAState &dea_xi4, const double dea_k[24], const double dea_param[4], const double ref[15], double t);
         void getTargetAttitude(double controller_output[3], mavros_msgs::AttitudeTarget &attitude, int uav);
         geometry_msgs::Vector3 crossProduct(const geometry_msgs::Vector3 v1, const geometry_msgs::Vector3 v2);

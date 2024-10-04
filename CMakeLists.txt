@@ -111,11 +111,7 @@ add_executable(double_sls_node src/double_sls_node.cpp)
 target_link_libraries(double_sls_node ${PROJECT_NAME} ${catkin_LIBRARIES})
 
 
-add_subdirectory(src/DEAController)
 add_subdirectory(src/DSLSDEAController)
-
-
-target_link_libraries(double_sls_node DEAController)
 target_link_libraries(double_sls_node DSLSDEAController)
 
 
