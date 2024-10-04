@@ -1,6 +1,5 @@
 # Double SLS Controller
 
-[![DSLS Tracking](https://img.youtube.com/vi/GrKxC1hDQOI/0.jpg)](https://youtu.be/GrKxC1hDQOI "DSLS Tracking")
 Video available at https://www.youtube.com/watch?v=GrKxC1hDQOI
 
 ## Install/Getting Started  
