@@ -951,7 +951,7 @@
 # include "double_sls_controller/double_sls_controller.h"
 
 int main(int argc, char** argv) {
-    ros::init(argc, argv, "double_sls_cpp_controller");
+    ros::init(argc, argv, "double_sls_controller");
     ros::NodeHandle nh("");
     ros::NodeHandle nh_private("~");    
     dslsCtrl* dslsController = new dslsCtrl(nh, nh_private);

@@ -55,14 +55,45 @@ dslsCtrl::dslsCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
     set_mode_client_0_ = nh_.serviceClient<mavros_msgs::SetMode> ("/uav0/mavros/set_mode");
     set_mode_client_1_ = nh_.serviceClient<mavros_msgs::SetMode> ("/uav1/mavros/set_mode");
     gz_link_state_client_ = nh_.serviceClient<gazebo_msgs::GetLinkState>("/gazebo/get_link_state");
+    set_ref_client_ = nh_.serviceClient<dynamic_reconfigure::Reconfigure>("set_parameters", 10);
     
-
-    // nh_private_.param<bool>("dea_enabled", dea_enabled_, false); 
-    nh_private_.param<double>("throttle_offset", throttle_offset_, 0.0); 
+    /* Initialize ROS Parameters */
+    // Mission
+    nh_private_.param<bool>("mission_enabled", mission_enabled_, false); 
+    // Inner-loop
+    nh_private_.param<double>("throttle_offset", throttle_offset_, 0.0);
+    nh_private_.param<double>("att_ctrl_tau", att_ctrl_tau_, 0.8);
+    /* DEA Controller */
+    // Switch
+    nh_private_.param<bool>("dea_enabled", dea_enabled_, false); 
+    nh_private_.param<bool>("dea_preintegrate_enabled", dea_preintegrate_enabled_, false);   
+    // Reference
+    nh_private_.param<double>("radium_scalar", radium_scalar_, 0.0); 
+    nh_private_.param<double>("freq_scalar", freq_scalar_, 0.0);
+    nh_private_.param<double>("radium_x", r_1_, 1.0);
+    nh_private_.param<double>("radium_y", r_2_, 1.0);
+    nh_private_.param<double>("radium_z", r_3_, 1.0);
+    nh_private_.param<double>("freq_x", fr_1_, 1.0);
+    nh_private_.param<double>("freq_y", fr_2_, 1.0);
+    nh_private_.param<double>("freq_z", fr_3_, 1.0);
     nh_private_.param<double>("ref_x", c_1_, 0.0); 
     nh_private_.param<double>("ref_y", c_2_, 0.0);
     nh_private_.param<double>("ref_z", c_3_, -2.0);
-    
+    nh_private_.param<double>("phi_x", ph_1_, 0.0);
+    nh_private_.param<double>("phi_y", ph_2_, PI/2);
+    nh_private_.param<double>("phi_z", ph_3_, 0.0);
+    nh_private_.param<double>("ref_q13", q_1_3_r_, 0.7406322196911044);
+    nh_private_.param<double>("ref_q21", q_2_1_r_, 0);
+    nh_private_.param<double>("ref_q22", q_2_2_r_, -0.6717825272800765);
+    // Gains
+
+
+    /* LPF */ 
+    nh_private_.param<double>("lpf_tau", lpf_tau_, 0.01);
+    nh_private_.param<double>("lpf_xi", lpf_xi_, 0.7);
+    nh_private_.param<double>("lpf_omega", lpf_omega_, 100);
+
+
 
     
     cmdloop_timer_ = nh_.createTimer(ros::Duration(0.004), &dslsCtrl::cmdloopCallback, this);
@@ -81,7 +112,7 @@ dslsCtrl::dslsCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
 
     for(int j=0; j<4; j++) dea_xi4_.dea_xi4[j] = dea_xi4_ic_[j];  
 
-    nh_.getParam("bool", dea_enabled_);
+    // nh_.getParam("bool", dea_enabled_);
     dea_last_status_ = dea_enabled_;
 }
 
@@ -151,7 +182,7 @@ void dslsCtrl::gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg){
     double diff_time;
     diff_time = (ros::Time::now().toSec() - gazebo_last_called_); 
     gazebo_last_called_ = ros::Time::now().toSec();
-    printf("gazebo_time_step: %.8f\n", diff_time);
+    // printf("gazebo_time_step: %.8f\n", diff_time);
 
     // if(diff_time > MIN_DELTA_TIME){    
     //     // pend0_q_dot_.x = (pend0_q_.x - pend0_q_last_.x) / diff_time;
@@ -228,7 +259,7 @@ void dslsCtrl::gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg){
     // state18_.state18[16] = pend1_omega_.y;
     // state18_.state18[17] = pend1_omega_.z;   
 
-    nh_.getParam("bool", dea_enabled_);
+    // nh_.getParam("bool", dea_enabled_);
     if(dea_enabled_ && dea_enabled_ != dea_last_status_) {
         dea_start_time_ = ros::Time::now().toSec();
         ROS_INFO_STREAM("[main] DEA controller enabled");
@@ -239,6 +270,8 @@ void dslsCtrl::gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg){
     } 
     dea_last_status_ = dea_enabled_;
     // ROS_INFO_STREAM("dsls_dea_ref:" << dsls_dea_ref_[2] << " " << dsls_dea_ref_[6] << " " << dsls_dea_ref_[10]);
+
+    executeMission(); // execute mission if enabled
 
     if(dea_enabled_){
         // ROS_INFO_STREAM("Running DEA...");
@@ -264,7 +297,6 @@ void dslsCtrl::gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg){
 }
 
 void dslsCtrl::force_rate_convert(double controller_output[3], mavros_msgs::AttitudeTarget &attitude, int uav){
-    double attctrl_tau = 0.1;
     double thrust_norm_hover = 0.538;
     double thrust_coeff = 100;  
     double thrust_0 = 1.55*9.81;
@@ -298,6 +330,10 @@ void dslsCtrl::force_rate_convert(double controller_output[3], mavros_msgs::Atti
     ref_roll = std::asin((std::cos(curr_yaw) * controller_output[1] - std::sin(curr_yaw) * controller_output[0])/ref_thrust);
     ref_pitch = std::atan2(std::cos(curr_yaw) * controller_output[0] + std::sin(curr_yaw) * controller_output[1], -controller_output[2]);
     ref_yaw = 0;
+
+    // Restrict Maximum Tilt
+    if(std::abs(ref_roll) > max_tilt_angle_) ref_roll = std::copysign(ref_roll, max_tilt_angle_);
+    if(std::abs(ref_pitch) > max_tilt_angle_) ref_pitch = std::copysign(ref_pitch, max_tilt_angle_);
 
     tf2::Quaternion attitude_target_q;
     bool ref_rpy_debug_enabled = false;
@@ -334,9 +370,9 @@ void dslsCtrl::force_rate_convert(double controller_output[3], mavros_msgs::Atti
     const Eigen::Vector4d inverse(1.0, -1.0, -1.0, -1.0);
     const Eigen::Vector4d q_inv = inverse.asDiagonal() * curr_att;
     const Eigen::Vector4d qe = quatMultiplication(q_inv, ref_att); // ROS_INFO_STREAM("qe:" << qe);
-    attitude.body_rate.x = (2.0 / attctrl_tau) * std::copysign(1.0, qe(0)) * qe(1);
-    attitude.body_rate.y = (2.0 / attctrl_tau) * std::copysign(1.0, qe(0)) * qe(2);
-    attitude.body_rate.z = (2.0 / attctrl_tau) * std::copysign(1.0, qe(0)) * qe(3);   
+    attitude.body_rate.x = (2.0 / att_ctrl_tau_) * std::copysign(1.0, qe(0)) * qe(1);
+    attitude.body_rate.y = (2.0 / att_ctrl_tau_) * std::copysign(1.0, qe(0)) * qe(2);
+    attitude.body_rate.z = (2.0 / att_ctrl_tau_) * std::copysign(1.0, qe(0)) * qe(3);   
 
     // ROS_INFO_STREAM("body_rate_x:" << attitude.body_rate.x << " desired_rate_(0):" << desired_rate_(0));
     // ROS_INFO_STREAM("body_rate_y:" << attitude.body_rate.y << " desired_rate_(1):" << desired_rate_(1));
@@ -559,10 +595,10 @@ int dslsCtrl::applyDSLSDEAController(
 
     /* Controller State Integration */
 
-    if(dea_enabled_){
+    if(dea_enabled_ || dea_preintegrate_enabled_){
         for(int j = 0; j < 4; j ++){
             dea_xi4_.dea_xi4[j] += xi_dot[j]*diff_time; // Euler
-            if(std::isnan(dea_xi4.dea_xi4[j])){
+            if(dea_xi4.dea_xi4[j] > max_xi_value_ || std::isnan(dea_xi4.dea_xi4[j])){
                 reset_controller_state = true;
                 break;
             } 
@@ -835,9 +871,77 @@ void dslsCtrl::pubDebugData(){
 
 
 void dslsCtrl::dynamicReconfigureCallback(double_sls_controller::DoubleSLSControllerConfig &config, uint32_t level) {
-    if(throttle_offset_ != config.throttle_offset) {
+    /* Mission */
+    if(mission_enabled_ != config.mission_enabled) {
+        if(mission_enabled_){
+            loadDSLSDEARef(); // load ref when quitting mission mode
+        }
+        mission_enabled_ = config.mission_enabled;
+        ROS_INFO("Reconfigure request : mission_enabled = %s ", mission_enabled_ ? "true" : "false");
+    } 
+    // Inner-Loop
+    else if(throttle_offset_ != config.throttle_offset) {
         throttle_offset_ = config.throttle_offset;
         ROS_INFO("Reconfigure request : throttle_offset = %.2f ", config.throttle_offset);
+    }    
+    else if(att_ctrl_tau_ != config.att_ctrl_tau) {
+        att_ctrl_tau_ = config.att_ctrl_tau;
+        ROS_INFO("Reconfigure request : att_ctrl_tau_ = %.2f ", config.att_ctrl_tau);
+    }        
+    /* DEA */
+    // Switch
+    else if(dea_enabled_ != config.dea_enabled) {
+        dea_enabled_ = config.dea_enabled;
+        ROS_INFO("Reconfigure request : dea_enabled = %s ", config.dea_enabled?"true":"false");
+    } 
+    else if(dea_preintegrate_enabled_ != config.dea_preintegrate_enabled) {
+        dea_preintegrate_enabled_ = config.dea_preintegrate_enabled;
+        ROS_INFO("Reconfigure request : dea_preintegrate_enabled = %s ", config.dea_preintegrate_enabled?"true":"false");
+    }
+    // Reference
+    else if(radium_scalar_ != config.radium_scalar) {
+        radium_scalar_ = config.radium_scalar;
+        dsls_dea_ref_[0] = r_1_ * radium_scalar_;
+        dsls_dea_ref_[4] = r_2_ * radium_scalar_;
+        dsls_dea_ref_[8] = r_3_ * radium_scalar_;
+        ROS_INFO("Reconfigure request : radium_scalar_ = %.2f ", radium_scalar_);
+    }
+    else if(freq_scalar_ != config.freq_scalar) {
+        freq_scalar_ = config.freq_scalar;
+        dsls_dea_ref_[1] = fr_1_ * freq_scalar_;
+        dsls_dea_ref_[5] = fr_2_ * freq_scalar_;
+        dsls_dea_ref_[9] = fr_3_ * freq_scalar_;
+        ROS_INFO("Reconfigure request : freq_scalar_ = %.2f ", freq_scalar_);
+    }
+    else if(r_1_ != config.radium_x) {
+        r_1_ = config.radium_x;
+        dsls_dea_ref_[0] = r_1_;
+        ROS_INFO("Reconfigure request : radium_x = %.2f ", dsls_dea_ref_[0]);
+    }
+    else if(r_2_ != config.radium_y) {
+        r_2_ = config.radium_y;
+        dsls_dea_ref_[4] = r_2_;
+        ROS_INFO("Reconfigure request : radium_y = %.2f ", dsls_dea_ref_[4]);
+    }
+    else if(r_3_ != config.radium_z) {
+        r_3_ = config.radium_z;
+        dsls_dea_ref_[8] = r_3_;
+        ROS_INFO("Reconfigure request : radium_z = %.2f ", dsls_dea_ref_[8]);
+    }
+    else if(fr_1_ != config.freq_x) {
+        fr_1_ = config.freq_x;
+        dsls_dea_ref_[1] = fr_1_;
+        ROS_INFO("Reconfigure request : freq_x = %.2f ", dsls_dea_ref_[1]);
+    }
+    else if(fr_2_ != config.freq_y) {
+        fr_2_ = config.freq_y;
+        dsls_dea_ref_[5] = fr_2_;
+        ROS_INFO("Reconfigure request : freq_y = %.2f ", dsls_dea_ref_[5]);
+    }
+    else if(fr_3_ != config.freq_z) {
+        fr_3_ = config.freq_z;
+        dsls_dea_ref_[9] = fr_3_;
+        ROS_INFO("Reconfigure request : freq_z = %.2f ", dsls_dea_ref_[9]);
     }
     else if(c_1_ != config.ref_x) {
         c_1_ = config.ref_x;
@@ -857,6 +961,7 @@ void dslsCtrl::dynamicReconfigureCallback(double_sls_controller::DoubleSLSContro
 
 
 
+    // Gains
     else if(dea_k_[0] != config.Kpos_x) {
         dea_k_[0] = config.Kpos_x;
         ROS_INFO("Reconfigure request : Kpos_x = %.2f ", dea_k_[0]);
@@ -938,6 +1043,9 @@ void dslsCtrl::dynamicReconfigureCallback(double_sls_controller::DoubleSLSContro
         dea_k_[20] = config.Kjer_z;
         ROS_INFO("Reconfigure request : Kjer_z = %.2f ", dea_k_[20]);
     }
+
+
+
 }
 
 gazebo_msgs::LinkState dslsCtrl::getLinkState(std::string link_name) {
@@ -962,3 +1070,121 @@ geometry_msgs::Twist dslsCtrl::getLinkTwist(std::string link_name){
     current_twist = this->getLinkState(link_name).twist;
     return current_twist;
 }
+
+int dslsCtrl::executeMission(void) {
+    if(!mission_enabled_ || !dea_enabled_) {
+        if(mission_start_) mission_start_ = false;
+        if(mission_stage_) mission_stage_ = 0; // Reset Mission Stage
+        return 1;
+    }
+
+    if(!mission_start_) {
+        saveDSLSDEARef();
+        ROS_INFO_STREAM("[exeMission] Mission Start");
+        mission_start_ = true;        
+    }
+    
+    switch(mission_stage_) {
+        case 0: // Set-point 0 (DEA Origin)
+            if(!mission_ref_updated_){
+                setDEASetpoint(dea_mission_setpoint0_);
+                mission_ref_updated_ = true;
+            }
+            checkMissionStage(20);
+            break;
+        case 1: // Set-point 1
+            if(!mission_ref_updated_){
+                setDEASetpoint(dea_mission_setpoint1_);
+                mission_ref_updated_ = true;
+            }
+            checkMissionStage(10);
+            break;
+        case 2: // Set-point 2
+            if(!mission_ref_updated_){
+                setDEASetpoint(dea_mission_setpoint2_);
+                mission_ref_updated_ = true;
+            }
+            checkMissionStage(10);
+            break;
+        case 3: // Set-point 
+            if(!mission_ref_updated_){
+                setDEASetpoint(dea_mission_setpoint3_);
+                mission_ref_updated_ = true;
+            }
+            checkMissionStage(10);
+            break;
+        case 4: // Back to Set-point 0 (DEA Origin)
+            if(!mission_ref_updated_){
+                setDEASetpoint(dea_mission_setpoint0_);
+                mission_ref_updated_ = true;
+            }
+            checkMissionStage(10);
+            break;
+        case 5: // Trajectory Tracking
+            if(!mission_ref_updated_){
+                setDEATrajectory(dea_mission_trajectory_);
+                mission_ref_updated_ = true;
+            }
+            checkMissionStage(40);
+            break;
+        case 6: // Back to Set-point 0 (DEA Origin)
+            if(!mission_ref_updated_){
+                setDEASetpoint(dea_mission_setpoint0_);
+                mission_ref_updated_ = true;
+            }
+            checkMissionStage(10);
+            break;            
+        default: // Reset Mission
+            if(ros::Time::now().toSec() - mission_time_last_ >= 10){
+                ROS_INFO("[exeMission] Mission Accomplished");
+                mission_time_last_ = ros::Time::now().toSec();
+            }
+    }
+    return 0;
+}
+
+int dslsCtrl::checkMissionStage(double mission_time_span) {
+    if(ros::Time::now().toSec() - mission_time_last_ >= mission_time_span) {
+        mission_time_last_ = ros::Time::now().toSec();
+        mission_stage_ += 1;
+        mission_ref_updated_ = false;
+        ROS_INFO_STREAM("[exeMission] Stage " << mission_stage_-1 << " ended, switching to stage " << mission_stage_);
+        return 0;
+    }
+    return 1;
+}
+
+int dslsCtrl::setDEASetpoint(double dea_setpoint[6]) {
+    dsls_dea_ref_[0] = 0.0;
+    dsls_dea_ref_[4] = 0.0;
+    dsls_dea_ref_[8] = 0.0;
+    dsls_dea_ref_[2] = dea_setpoint[0];
+    dsls_dea_ref_[6] = dea_setpoint[1];
+    dsls_dea_ref_[10] = dea_setpoint[2];
+    dsls_dea_ref_[12] = dea_setpoint[3];
+    dsls_dea_ref_[13] = dea_setpoint[4];
+    dsls_dea_ref_[14] = dea_setpoint[5];
+    return 0;
+}
+
+int dslsCtrl::setDEATrajectory(double dea_trajectory[15]){
+    for(int i = 0; i<15; i++){
+        dsls_dea_ref_[i] = dea_trajectory[i];
+    }
+    return 0;
+}
+
+int dslsCtrl::saveDSLSDEARef(void) {
+    for(int i=0; i<15; i++){
+        dsls_dea_ref_temp_[i] = dsls_dea_ref_[i]; // save refs
+    }
+    return 0;
+}
+
+int dslsCtrl::loadDSLSDEARef(void) {
+    for(int i=0; i<15; i++){
+        dsls_dea_ref_[i] = dsls_dea_ref_temp_[i]; // save refs
+    }
+    return 0;
+}
+

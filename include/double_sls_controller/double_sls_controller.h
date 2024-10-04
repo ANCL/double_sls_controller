@@ -35,6 +35,9 @@
 
 #include <double_sls_controller/DoubleSLSControllerConfig.h>
 #include <dynamic_reconfigure/server.h>
+#include <dynamic_reconfigure/Reconfigure.h>
+#include <dynamic_reconfigure/Config.h>
+#include <dynamic_reconfigure/DoubleParameter.h>
 
 #include <iostream>
 #include <fstream>
@@ -120,6 +123,7 @@ class dslsCtrl {
         ros::ServiceClient set_mode_client_0_;
         ros::ServiceClient set_mode_client_1_;
         ros::ServiceClient gz_link_state_client_;
+        ros::ServiceClient set_ref_client_;
         ros::Timer cmdloop_timer_, statusloop_timer_;
         ros::Time last_request_, reference_request_now_, reference_request_last_;
 
@@ -136,6 +140,8 @@ class dslsCtrl {
         bool force_clip_enabled_ = false;
         bool lpf_debug_enabled_ = false;
         bool time_sync_debug_enabled_ = false;
+        bool dea_controller_enabled_ = false;
+        bool dea_preintegrate_enabled_ = false;
 
         /* physical parameters */
         double max_fb_acc_ = 10.0;
@@ -146,48 +152,48 @@ class dslsCtrl {
         double max_thrust_force_ = 31.894746920044025;
         double throttle_offset_ = 0.0;
         const double dea_param_[4] = {load_mass_, uav_mass_, cable_length_, gravity_acc_};
+        double max_tilt_angle_ = 0.78598163; //45 deg
+        double max_xi_value_ = 1e5;
+        double att_ctrl_tau_ = 0.8;
 
         /* Reference Trajectory & Pend Angle */
-        double trajectory_tracking_flag_ = 0;
-        double r_1_ = 5.0 * trajectory_tracking_flag_;
+        double radium_scalar_ = 0;
+        double freq_scalar_ = 0;
+        double r_1_ = 5.0 ;
         double fr_1_ = 1.0;
         double c_1_ = 0;
         double ph_1_ = 0;
-        double r_2_ = 5.0 * trajectory_tracking_flag_;
+        double r_2_ = 5.0 ;
         double fr_2_ = 1.0;
         double c_2_ = 0.0;
         double ph_2_ = PI/2;
-        double r_3_ = 0 * trajectory_tracking_flag_;
+        double r_3_ = 0;
         double fr_3_ = 0.0;
         double c_3_ = -2.0;
         double ph_3_ = 0;
-        double pend_angle_deg_ = 90;
-        double q_1_3_r_ = 0.7406322196911044;
+        double pend_angle_deg_ = 90; // deprecated
+        double q_1_3_r_ = 0.7406322196911044; //sqrt(2)/2;
         double q_2_1_r_ = 0;
-        double q_2_2_r_ = -0.6717825272800765;
-        double dea_ref_[13] = {r_1_, fr_1_, c_1_, ph_1_, r_2_, fr_2_, c_2_, ph_2_, r_3_, fr_3_, c_3_, ph_3_, pend_angle_deg_};
-        double dsls_dea_ref_[15] = {r_1_, fr_1_, c_1_, ph_1_, r_2_, fr_2_, c_2_, ph_2_, r_3_, fr_3_, c_3_, ph_3_, q_1_3_r_, q_2_1_r_, q_2_2_r_};
+        double q_2_2_r_ = -0.6717825272800765; //-sqrt(2)/2;
+        double dsls_dea_ref_[15] = {r_1_ * radium_scalar_, fr_1_ * freq_scalar_, c_1_, ph_1_, 
+                                    r_2_ * radium_scalar_, fr_2_ * freq_scalar_, c_2_, ph_2_, 
+                                    r_3_ * radium_scalar_, fr_3_ * freq_scalar_, c_3_, ph_3_, 
+                                    q_1_3_r_, q_2_1_r_, q_2_2_r_};
+        double dsls_dea_ref_temp_[15];
 
         /* Gains */
-        double dea_k1_[4] = {8.9443,    14.3819,    11.0036,   4.7966};
-        double dea_k2_[4] = {8.9443,    14.3819,    11.0036,   4.7966};
+        double dea_k1_[4] = {31.6228,   37.4556,   20.6010,    6.4963};
+        double dea_k2_[4] = {31.6228,   37.4556,   20.6010,    6.4963};
         double dea_k3_[4] = {24.0000,   50.0000,   35.0000,   10.0000};
         double dea_k4_[4] = {2.0000,    3.0000,         0,         0};
         double dea_k5_[4] = {2.0000,    3.0000,         0,         0};
         double dea_k6_[4] = {2.0000,    3.0000,         0,         0};
-
-        // double dea_k1_[4] = {1,	3.07768353717525,	4.23606797749979,	3.07768353717525};
-        // double dea_k2_[4] = {1,	3.07768353717525,	4.23606797749979,	3.07768353717525};
-        // double dea_k3_[4] = {1,	3.07768353717525,	4.23606797749979,	3.07768353717525};
-        // double dea_k4_[4] = {1,	3.07768353717525,	0,	0};
-        // double dea_k5_[4] = {1,	3.07768353717525,	0,	0};
-        // double dea_k6_[4] = {1,	3.07768353717525,	0,	0};
         double dea_k_[24];
 
         /* lpf parameters*/
-        double lpf_tau_ = 1.0; // 0.01;
-        double lpf_xi_ = 0.5; //0.7;
-        double lpf_omega_ = 0.1; //100;
+        double lpf_tau_;
+        double lpf_xi_;
+        double lpf_omega_;
 
         /* (Primed) Initial Conditions */
         double load_pose_ic_[3] = {0, 0, c_3_};
@@ -220,6 +226,25 @@ class dslsCtrl {
             "slung_load::pendulum_1::base_link",
             "slung_load::load::base_link"
             };
+
+
+        /* Mission */
+        bool mission_enabled_ = false;
+        bool mission_start_ = false;
+        bool mission_ref_updated_ = false;
+        int mission_stage_ = 0;
+        double mission_time_last_ = 0;
+        double dea_mission_setpoint0_[6] = {0.0, 0.0, -2.0, q_1_3_r_, q_2_1_r_, q_2_2_r_};
+        double dea_mission_setpoint1_[6] = {1.0, 0.0, -2.0, q_1_3_r_, q_2_1_r_, q_2_2_r_};
+        double dea_mission_setpoint2_[6] = {0.0, 1.0, -2.0, q_1_3_r_, q_2_1_r_, q_2_2_r_};
+        double dea_mission_setpoint3_[6] = {0.0, 0.0, -2.5, q_1_3_r_, q_2_1_r_, q_2_2_r_};
+        double dea_mission_trajectory_[15] = {
+            1.0, 0.5, 0.0, 0.0,
+            1.0, 0.5, 0.0, PI/2,
+            0.0, 0.0, -2.0, 0.0,
+            q_1_3_r_, q_2_1_r_, q_2_2_r_
+        };
+
 
         std::string uav0_link_name_ = "px4vision_0::base_link";
         std::string uav1_link_name_ = "px4vision_1::base_link";
@@ -307,6 +332,12 @@ class dslsCtrl {
         geometry_msgs::Pose home_pose_;
         bool received_home_pose;
         std::shared_ptr<Control> controller_;
+        int executeMission(void);
+        int checkMissionStage(double mission_time_span);
+        int setDEASetpoint(double dea_setpoint[6]);
+        int setDEATrajectory(double dea_trajectory[15]);
+        int saveDSLSDEARef(void);
+        int loadDSLSDEARef(void);
 
 
     public:
