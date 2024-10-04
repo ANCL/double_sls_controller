@@ -90,3 +90,7 @@ roslaunch double_sls_controller double_sls_node.launch
 # in a new terminal
 rosrun rqt_reconfigure rqt_reconfigure
 ```
+* Move sliders to change gains and references
+* Check tick-box "dea_preintegrate_enabled" to let controller states converge
+* Check tick-box "dea_enabled" to enable DEA
+* Check tick-box "mission_enabled" to start set-point and trajectory tracking mission
