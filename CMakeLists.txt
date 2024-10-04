@@ -99,49 +99,23 @@ include_directories(
 
 
 add_library(${PROJECT_NAME}
-  # src/single_sls_controller.cpp
   src/double_sls_controller.cpp
 )
-
 
 
 add_dependencies(double_sls_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
-# add_executable(offb_control_node src/offb_node.cpp)
-# add_executable(get_states_node src/get_states_node.cpp)
-# add_executable(single_sls_controller_node src/single_sls_controller_node.cpp)
-add_executable(double_sls_uav0_node src/double_sls_uav0_node.cpp)
-add_executable(double_sls_uav1_node src/double_sls_uav1_node.cpp)
+
 add_executable(double_sls_node src/double_sls_node.cpp)
-
-# add_dependencies(get_states_node double_sls_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-# target_link_libraries(get_states_node ${PROJECT_NAME} ${catkin_LIBRARIES})
-# target_link_libraries(offb_control_node ${PROJECT_NAME} ${catkin_LIBRARIES})
-# target_link_libraries(single_sls_controller_node ${PROJECT_NAME} ${catkin_LIBRARIES})
-target_link_libraries(double_sls_uav0_node ${PROJECT_NAME} ${catkin_LIBRARIES})
-target_link_libraries(double_sls_uav1_node ${PROJECT_NAME} ${catkin_LIBRARIES})
 target_link_libraries(double_sls_node ${PROJECT_NAME} ${catkin_LIBRARIES})
 
-# add_subdirectory(src/StabController)
-# add_subdirectory(src/TracController)
-# add_subdirectory(src/QuadSLS_PT_Controller_QSF)
+
 add_subdirectory(src/DEAController)
 add_subdirectory(src/DSLSDEAController)
 
-# target_link_libraries(get_states_node StabController)
-# target_link_libraries(offb_control_node StabController)
-# target_link_libraries(get_states_node TracController)
-# target_link_libraries(offb_control_node TracController)
-# target_link_libraries(get_states_node QuadSLS_PT_Controller_QSF)
-# target_link_libraries(offb_control_node QuadSLS_PT_Controller_QSF)
-# target_link_libraries(single_sls_controller_node QuadSLS_PT_Controller_QSF)
-target_link_libraries(double_sls_uav0_node DEAController)
-target_link_libraries(double_sls_uav1_node DEAController)
+
 target_link_libraries(double_sls_node DEAController)
-target_link_libraries(double_sls_uav0_node DSLSDEAController)
-target_link_libraries(double_sls_uav1_node DSLSDEAController)
 target_link_libraries(double_sls_node DSLSDEAController)
 
 
