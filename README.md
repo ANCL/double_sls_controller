@@ -1,5 +1,7 @@
 # Double SLS Controller
 
+Video available at https://www.youtube.com/watch?v=GrKxC1hDQOI
+
 ## Install/Getting Started  
 ### 1. Install PX4-Autopilot v1.14
 ```
@@ -81,5 +83,10 @@ cd
 ### 4. Launch Double SLS Contoller
 ```
 # in a new terminal
-rosrun double_sls_controller double_sls_node
+roslaunch double_sls_controller double_sls_node.launch
+```
+### 5. Run Dynamic Reconfigure Gui
+```
+# in a new terminal
+rosrun rqt_reconfigure rqt_reconfigure
 ```
