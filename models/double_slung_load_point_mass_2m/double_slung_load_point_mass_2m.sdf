@@ -1,0 +1,106 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+  <enable_lockstep>false</enable_lockstep>
+  <model name='double_slung_load_point_mass'>
+    <static>false</static>
+
+    <include>
+      <uri>model://ball_hinge</uri>
+      <name>ball_hinge_0</name>
+      <pose>0 2.0 0 -1.57 0 0</pose>
+      <!-- <pose>0 2.5 0 -1.57 0 0</pose> -->
+    </include>
+
+    <include>
+      <uri>model://ball_hinge</uri>
+      <name>ball_hinge_1</name>
+      <pose>0 -2.0 0 1.57 0 0</pose>
+      <!-- <pose>0 -2.5 0 1.57 0 0</pose> -->
+    </include>
+
+    <include>
+      <uri>model://pendulum_2m</uri>
+      <name>pendulum_0</name>
+      <pose>0 1.0 0 -1.57 0 0</pose>
+      <!-- <pose>0 1.25 0 -1.57 0 0</pose> -->
+    </include>
+
+    <include>
+      <uri>model://pendulum_2m</uri>
+      <name>pendulum_1</name>
+      <pose>0 -1.0 0 1.57 0 0</pose>
+      <!-- <pose>0 -1.25 0 1.57 0 0</pose> -->
+    </include>
+
+    <include>
+      <uri>model://load_point_mass</uri>
+      <name>load</name>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
+
+
+
+    <joint name="load_0_joint" type="universal">
+      <pose>0 0 0 0 0 0</pose>
+      <child>load::base_link</child>
+      <parent>pendulum_0::base_link</parent>
+      <axis>
+        <xyz>1 1 1</xyz>
+        <dynamics>
+          <friction>10</friction>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <joint name="load_1_joint" type="universal">
+      <pose>0 0 0 0 0 0</pose>
+      <child>load::base_link</child>
+      <parent>pendulum_1::base_link</parent>
+      <axis>
+        <xyz>1 1 1</xyz>
+        <dynamics>
+          <friction>10</friction>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <joint name="ball_hinge_0_joint" type="universal">
+      <pose>0 0 1.0 0 0 0</pose>
+      <!-- <pose>0 0 1.25 0 0 0</pose> -->
+      <child>pendulum_0::base_link</child>
+      <parent>ball_hinge_0::base_link</parent>
+      <axis>
+        <xyz>1 1 0</xyz>
+        <dynamics>
+          <friction>10</friction>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <joint name="ball_hinge_1_joint" type="universal">
+      <pose>0 0 1.0 0 0 0</pose>
+      <!-- <pose>0 0 1.25 0 0 0</pose> -->
+      <child>pendulum_1::base_link</child>
+      <parent>ball_hinge_1::base_link</parent>
+      <axis>
+        <xyz>1 1 0</xyz>
+        <dynamics>
+          <friction>10</friction>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <!-- <include>
+      <uri>model://px4vision</uri>
+      <name>quad_0</name>
+      <pose>0 0.85 0 0 0 0</pose>
+    </include>
+
+    <joint name="quad_0_joint" type="universal">
+      <pose>0 0 0.425 0 0 0</pose>
+      <child>ball_hinge_0::base_link</child>
+      <parent>quad_0::base_link</parent>
+    </joint> -->
+
+  </model>
+</sdf>

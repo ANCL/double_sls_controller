@@ -1,1 +1,0 @@
-set(ORDERED_PATHS "/home/zichen/catkin_ws/devel/lib;/opt/ros/noetic/lib")

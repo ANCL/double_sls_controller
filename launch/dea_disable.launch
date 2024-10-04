@@ -1,0 +1,9 @@
+<launch>
+    <group ns="uav0">
+        <rosparam command="load" file="$(find double_sls_controller)/cfg/double_sls_controller_dea_disabled.yaml" />
+    </group>
+
+    <group ns="uav1">
+        <rosparam command="load" file="$(find double_sls_controller)/cfg/double_sls_controller_dea_disabled.yaml" />
+    </group>
+</launch>
