@@ -3,37 +3,6 @@
 #include <double_sls_controller/control.h>
 #include <DSLSDEAController.h>
 
-void callback(double_sls_controller::configConfig &config, uint32_t level) {
-//    dea_k[0] = config.dea_k_0;
-//    dea_k[1] = config.dea_k_1;
-//    dea_k[2] = config.dea_k_2;
-//    dea_k[3] = config.dea_k_3;
-//    dea_k[4] = config.dea_k_4;
-//    dea_k[5] = config.dea_k_5;
-//    dea_k[6] = config.dea_k_6;
-//    dea_k[7] = config.dea_k_7;
-//    dea_k[8] = config.dea_k_8;
-//    dea_k[9] = config.dea_k_9;
-//    dea_k[10] = config.dea_k_10;
-//    dea_k[11] = config.dea_k_11;
-//    dea_k[12] = config.dea_k_12;
-//    dea_k[13] = config.dea_k_13;
-//    dea_k[14] = config.dea_k_14;
-//    dea_k[15] = config.dea_k_15;
-//    dea_k[16] = config.dea_k_16;
-//    dea_k[17] = config.dea_k_17;
-//    dea_k[18] = config.dea_k_18;
-//    dea_k[19] = config.dea_k_19;
-//    dea_k[20] = config.dea_k_20;
-//    dea_k[21] = config.dea_k_21;
-//    dea_k[22] = config.dea_k_22;
-//    dea_k[23] = config.dea_k_23;
-
-//    for(int j = 0; j < 24; j++){
-//        ROS_INFO_STREAM(dea_k[j]);
-//     }
-}
-
 dslsCtrl::dslsCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private):nh_(nh), nh_private_(nh_private), node_state(WAITING_FOR_HOME_POSE) {
     state_sub_0_ = nh_.subscribe<mavros_msgs::State> ("/uav0/mavros/state", 10, &dslsCtrl::stateCb_0, this, ros::TransportHints().tcpNoDelay());  
     state_sub_1_ = nh_.subscribe<mavros_msgs::State> ("/uav1/mavros/state", 10, &dslsCtrl::stateCb_1, this, ros::TransportHints().tcpNoDelay());   
@@ -181,52 +150,7 @@ void dslsCtrl::gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg){
     double diff_time;
     diff_time = (ros::Time::now().toSec() - gazebo_last_called_); 
     gazebo_last_called_ = ros::Time::now().toSec();
-    // printf("gazebo_time_step: %.8f\n", diff_time);
 
-    // if(diff_time > MIN_DELTA_TIME){    
-    //     // pend0_q_dot_.x = (pend0_q_.x - pend0_q_last_.x) / diff_time;
-    //     // pend0_q_dot_.y = (pend0_q_.y - pend0_q_last_.y) / diff_time;
-    //     // pend0_q_dot_.z = (pend0_q_.z - pend0_q_last_.z) / diff_time;
-    //     // pend1_q_dot_.x = (pend1_q_.x - pend1_q_last_.x) / diff_time;
-    //     // pend1_q_dot_.y = (pend1_q_.y - pend1_q_last_.y) / diff_time;
-    //     // pend1_q_dot_.z = (pend1_q_.z - pend1_q_last_.z) / diff_time;
-    //     pend0_q_dot_ = applyFiniteDiffVector3(pend0_q_, pend0_q_last_, diff_time);
-    //     pend1_q_dot_ = applyFiniteDiffVector3(pend1_q_, pend1_q_last_, diff_time);
-    //     pend0_q_dot_lpf1_ = applyLPFVector3(pend0_q_, pend0_q_last_, pend0_q_last_2_, pend0_q_dot_lpf1_last_, pend0_q_dot_lpf1_last_2_, diff_time, lpf_tau_, lpf_xi_, lpf_omega_, 1);
-    //     pend1_q_dot_lpf1_ = applyLPFVector3(pend1_q_, pend1_q_last_, pend1_q_last_2_, pend1_q_dot_lpf1_last_, pend1_q_dot_lpf1_last_2_, diff_time, lpf_tau_, lpf_xi_, lpf_omega_, 1);
-    //     pend0_q_dot_lpf2_ = applyLPFVector3(pend0_q_, pend0_q_last_, pend0_q_last_2_, pend0_q_dot_lpf2_last_, pend0_q_dot_lpf2_last_2_, diff_time, lpf_tau_, lpf_xi_, lpf_omega_, 2);
-    //     pend1_q_dot_lpf2_ = applyLPFVector3(pend1_q_, pend1_q_last_, pend1_q_last_2_, pend1_q_dot_lpf2_last_, pend1_q_dot_lpf2_last_2_, diff_time, lpf_tau_, lpf_xi_, lpf_omega_, 2);
-        
-    // }    
-
-    // pend0_omega_ = crossProduct(pend0_q_, pend0_q_dot_);
-    // pend1_omega_ = crossProduct(pend1_q_, pend1_q_dot_);
-
-    // // LPF debug msg
-    // lpf_data_.header.stamp = ros::Time::now();
-    // lpf_data_.pend0_omega_lpf1 = crossProduct(pend0_q_, pend0_q_dot_lpf1_);
-    // lpf_data_.pend1_omega_lpf1 = crossProduct(pend1_q_, pend1_q_dot_lpf1_);
-    // lpf_data_.pend0_omega_lpf2 = crossProduct(pend0_q_, pend0_q_dot_lpf2_);
-    // lpf_data_.pend1_omega_lpf2 = crossProduct(pend1_q_, pend1_q_dot_lpf2_);
-
-    // // next step
-    // pend0_q_last_2_ = pend0_q_last_;
-    // pend1_q_last_2_ = pend1_q_last_;
-
-    // pend0_q_last_ = pend0_q_;
-    // pend1_q_last_ = pend1_q_;
-
-    // pend0_q_dot_lpf1_last_2_ = pend0_q_dot_lpf1_last_;
-    // pend1_q_dot_lpf1_last_2_ = pend1_q_dot_lpf1_last_;
-    // pend0_q_dot_lpf2_last_2_ = pend0_q_dot_lpf2_last_;
-    // pend1_q_dot_lpf2_last_2_ = pend1_q_dot_lpf2_last_; 
-
-    // pend0_q_dot_lpf1_last_ = pend0_q_dot_lpf1_;
-    // pend1_q_dot_lpf1_last_ = pend1_q_dot_lpf1_;
-    // pend0_q_dot_lpf2_last_ = pend0_q_dot_lpf2_;   
-    // pend1_q_dot_lpf2_last_ = pend1_q_dot_lpf2_;       
-
-    // Directly Use Gazebo omegas:
     if(gazebo_omega_enabled_){
         pend0_omega_.x = (msg -> twist[pend0_link_index_]).angular.x;
         pend0_omega_.y = -(msg -> twist[pend0_link_index_]).angular.y;
@@ -237,28 +161,6 @@ void dslsCtrl::gazeboCb(const gazebo_msgs::LinkStates::ConstPtr& msg){
     }
 
 
-    // // system state msg
-    // state18_.header.stamp = ros::Time::now();
-    // state18_.state18[0] = load_pose_.pose.position.x;
-    // state18_.state18[1] = load_pose_.pose.position.y;
-    // state18_.state18[2] = load_pose_.pose.position.z;
-    // state18_.state18[3] = pend0_q_.x;
-    // state18_.state18[4] = pend0_q_.y;
-    // state18_.state18[5] = pend0_q_.z;
-    // state18_.state18[6] = pend1_q_.x;
-    // state18_.state18[7] = pend1_q_.y;
-    // state18_.state18[8] = pend1_q_.z;
-    // state18_.state18[9] = load_twist_.twist.linear.x;
-    // state18_.state18[10] = load_twist_.twist.linear.y;
-    // state18_.state18[11] = load_twist_.twist.linear.z; 
-    // state18_.state18[12] = pend0_omega_.x;
-    // state18_.state18[13] = pend0_omega_.y;
-    // state18_.state18[14] = pend0_omega_.z;
-    // state18_.state18[15] = pend1_omega_.x;
-    // state18_.state18[16] = pend1_omega_.y;
-    // state18_.state18[17] = pend1_omega_.z;   
-
-    // nh_.getParam("bool", dea_enabled_);
     if(dea_enabled_ && dea_enabled_ != dea_last_status_) {
         dea_start_time_ = ros::Time::now().toSec();
         ROS_INFO_STREAM("[main] DEA controller enabled");
