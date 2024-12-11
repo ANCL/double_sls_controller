@@ -26,7 +26,7 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/transform_datatypes.h>
-#include <double_sls_controller/configConfig.h>
+// #include <double_sls_controller/configConfig.h>
 #include <double_sls_controller/common.h>
 #include <double_sls_controller/control.h>
 #include <double_sls_controller/DSlsState.h>
@@ -63,7 +63,7 @@ bool gotime;
 
 double dea_k[24];
 
-void callback(double_sls_controller::configConfig &config, uint32_t level);
+// void callback(double_sls_controller::configConfig &config, uint32_t level);
 
 #endif
 
@@ -132,7 +132,7 @@ class dslsCtrl {
         double cable_length_ = 0.85;
         double gravity_acc_ = 9.80665;
         double max_thrust_force_ = 31.894746920044025;
-        double throttle_offset_ = 0.0;
+        double norm_thrust_offset_ = 0.0;
         const double dea_param_[4] = {load_mass_, uav_mass_, cable_length_, gravity_acc_};
         double max_tilt_angle_ = 0.78598163; //45 deg
         double max_xi_value_ = 1e5;

@@ -29,7 +29,7 @@ dslsCtrl::dslsCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
     // Mission
     nh_private_.param<bool>("mission_enabled", mission_enabled_, false); 
     // Inner-loop
-    nh_private_.param<double>("throttle_offset", throttle_offset_, 0.0);
+    nh_private_.param<double>("throttle_offset", norm_thrust_offset_, 0.0);
     nh_private_.param<double>("att_ctrl_tau", att_ctrl_tau_, 0.8);
     /* DEA Controller */
     // Switch
@@ -282,7 +282,7 @@ void dslsCtrl::force_rate_convert(double controller_output[3], mavros_msgs::Atti
     /* Thrust */
 
     // attitude.thrust = std::max(0.0, std::min(1.0, (ref_thrust - thrust_0) / thrust_coeff + thrust_norm_hover));
-    attitude.thrust = std::max(0.0, std::min(1.0, ref_thrust / (max_thrust_force_) + throttle_offset_));
+    attitude.thrust = std::max(0.0, std::min(1.0, ref_thrust / (max_thrust_force_) + norm_thrust_offset_));
     attitude.type_mask = 128;
     // attitude.type_mask = 1|2|4;
 }
@@ -718,8 +718,8 @@ void dslsCtrl::dynamicReconfigureCallback(double_sls_controller::DoubleSLSContro
         ROS_INFO("Reconfigure request : mission_enabled = %s ", mission_enabled_ ? "true" : "false");
     } 
     // Inner-Loop
-    else if(throttle_offset_ != config.throttle_offset) {
-        throttle_offset_ = config.throttle_offset;
+    else if(norm_thrust_offset_ != config.throttle_offset) {
+        norm_thrust_offset_ = config.throttle_offset;
         ROS_INFO("Reconfigure request : throttle_offset = %.2f ", config.throttle_offset);
     }    
     else if(att_ctrl_tau_ != config.att_ctrl_tau) {
