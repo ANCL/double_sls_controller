@@ -1,7 +1,7 @@
 #include <double_sls_controller/double_sls_controller.h>
 #include <double_sls_controller/common.h>
 #include <double_sls_controller/control.h>
-#include <DSLSDEAController.h>
+#include <double_sls_controller/DSLSDEAController.h>
 
 dslsCtrl::dslsCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private):nh_(nh), nh_private_(nh_private), node_state(WAITING_FOR_HOME_POSE) {
     state_sub_0_ = nh_.subscribe<mavros_msgs::State> ("/uav0/mavros/state", 10, &dslsCtrl::stateCb_0, this, ros::TransportHints().tcpNoDelay());  
