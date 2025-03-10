@@ -11,7 +11,7 @@
     <arg name="debug" default="false"/>
     <arg name="verbose" default="false"/>
     <arg name="paused" default="true"/>
-    <arg name="node_start_delay" default="5.0"/>
+    <arg name="node_start_delay" default="7.0"/>
     <!-- Gazebo sim -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="gui" value="$(arg gui)"/>
@@ -28,7 +28,7 @@
         <arg name="fcu_url" default="udp://:14540@localhost:14580"/>
         
         <!-- PX4 SITL and vehicle spawn -->
-        <include file="$(find px4)/launch/single_vehicle_spawn_sdf.launch" >
+        <!-- <include file="$(find px4)/launch/single_vehicle_spawn_sdf.launch" >
             <arg name="x" value="0"/>
             <arg name="y" value="0.85"/>
             <arg name="z" value="0"/>
@@ -39,7 +39,15 @@
             <arg name="mavlink_udp_port" value="14560"/>
             <arg name="mavlink_tcp_port" value="4560"/>
             <arg name="ID" value="$(arg ID)"/>
+        </include> -->
+
+        <include file="$(find timed_roslaunch)/launch/timed_roslaunch.launch">
+            <arg name="time" value="3" />
+            <arg name="pkg" value="px4" />
+            <arg name="file" value="single_vehicle_spawn_sdf.launch" />
+            <arg name="value" value="x:=0.0 y:=0.85 z:=0 R:=0 P:=0 Y:=0 vehicle:=$(arg vehicle) mavlink_udp_port:=14560 mavlink_tcp_port:=4560 ID:=$(arg ID)"/>
         </include>
+        
 
         <!-- <arg name="x" default="0"/>
         <arg name="y" default="0.85"/>
@@ -79,7 +87,7 @@
         <arg name="fcu_url" default="udp://:14541@localhost:14581"/>
 
         <!-- PX4 SITL and vehicle spawn -->
-        <include file="$(find px4)/launch/single_vehicle_spawn_sdf.launch" >
+        <!-- <include file="$(find px4)/launch/single_vehicle_spawn_sdf.launch" >
             <arg name="x" value="0"/>
             <arg name="y" value="-0.85"/>
             <arg name="z" value="0"/>
@@ -90,6 +98,12 @@
             <arg name="mavlink_udp_port" value="14561"/>
             <arg name="mavlink_tcp_port" value="4561"/>
             <arg name="ID" value="$(arg ID)"/>
+        </include> -->
+        <include file="$(find timed_roslaunch)/launch/timed_roslaunch.launch">
+            <arg name="time" value="5" />
+            <arg name="pkg" value="px4" />
+            <arg name="file" value="single_vehicle_spawn_sdf.launch" />
+            <arg name="value" value="x:=0.0 y:=-0.85 z:=0 R:=0 P:=0 Y:=0 vehicle:=$(arg vehicle) mavlink_udp_port:=14561 mavlink_tcp_port:=4561 ID:=$(arg ID)"/>
         </include>
         
 

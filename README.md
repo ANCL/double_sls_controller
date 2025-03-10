@@ -163,7 +163,7 @@ export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/PX4-Autopilot/Tools/sitl_gazebo
 # in a new terminal
 roslaunch double_sls_controller double_px4vision_sls_world.launch
 ```  
-Note: If the vehicles are not generated properly in the GUI try relaunching this command.
+Note: There's a known graphical problem where one of the drones' graphic model is not generated properly in the Gazebo GUI. Please relaunch if this happens.
 ### 2. Attach the Drones and the Slung Load
 ```
 # in a new terminal
@@ -182,6 +182,7 @@ cd
 # in a new terminal
 roslaunch double_sls_controller double_sls_node.launch
 ```
+Note: Sometimes the two drones may not switch mode and arm together. Please try relaunching if that happens.
 ### 5. Run Dynamic Reconfigure Gui
 ```
 # in a new terminal
